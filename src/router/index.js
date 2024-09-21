@@ -8,6 +8,7 @@ import Tags from './../components/AppTags.vue'
 import AppTagsAddEdit from './../components/AppTagsAddEdit.vue'
 import Budgets from './../components/AppBudgets.vue'
 import AppBudgetsAddEdit from './../components/AppBudgetsAddEdit.vue'
+import Logs from './../components/AppLogs.vue'
 
 const routes = [
     {
@@ -49,7 +50,12 @@ const routes = [
         path: '/admin/dashboard/budgets/:budgetId',
         name: 'BudgetsAddEdit',
         component: AppBudgetsAddEdit,
-    }
+    },
+    {
+        path: '/admin/dashboard/logs',
+        name: 'Logs',
+        component: Logs,
+    },
 ]
 
 const router = createRouter({ history: createWebHistory(), routes })

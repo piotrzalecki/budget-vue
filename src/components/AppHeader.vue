@@ -35,6 +35,9 @@
               <li>
                 <router-link class="dropdown-item" to="/admin/dashboard/budgets">Budgets</router-link>
               </li>
+              <li>
+                <router-link class="dropdown-item" to="/admin/dashboard/logs">Logs</router-link>
+              </li>
             </ul>
 
           </li>
