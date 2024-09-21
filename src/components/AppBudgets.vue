@@ -2,8 +2,8 @@
     <div class="container">
         <div class="row">
             <div class="col mb-1 mt-3">
-                <h1 class="float-start">Tags</h1>
-                <router-link class="btn btn-success float-end" :to="`/admin/dashboard/tags/0`">New tag</router-link>
+                <h1 class="float-start">Budgets</h1>
+                <router-link class="btn btn-success float-end" :to="`/admin/dashboard/budgets/0`">New budget</router-link>
             </div>
             <hr>
             <table v-if="ready" class="table table-compact table-stripped">
@@ -14,14 +14,14 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr v-for="t in tags" :key="t.id">
+                    <tr v-for="b in budgets" :key="b.id">
                         <!-- <td>
                             <router-link :to="`/admin/users/${u.id}`">{{ u.last_name }}, {{ u.first_name }}</router-link>
                         </td> -->
-                        <td>{{ t.name }}</td>
-                        <td>{{ t.description }}</td>
+                        <td>{{ b.name }}</td>
+                        <td>{{ b.description }}</td>
                         <td>
-                            <router-link class="btn btn-warning" :to="`/admin/dashboard/tags/${t.id}`">EDIT</router-link>
+                            <router-link class="btn btn-warning" :to="`/admin/dashboard/budgets/${b.id}`">EDIT</router-link>
                         </td>
                     </tr>
                 </tbody>
@@ -37,23 +37,23 @@
 import {ref, onMounted, onBeforeMount} from 'vue'
 import Security from './security.js'
 export default {
-    name: 'AppTags',
+    name: 'AppBudgets',
     props: {},
     emits: ['error'],
 
     setup(props, cxt) {
         let ready = ref(false);
-        let tags = ref({})
+        let budgets = ref({})
 
         onBeforeMount(() => { Security.requireToken()})
         onMounted(() => {
-            fetch(process.env.VUE_APP_API_URL + "/admin/dashboard/tags", Security.requestOptions())
+            fetch(process.env.VUE_APP_API_URL + "/admin/dashboard/budgets", Security.requestOptions())
             .then((response) => response.json())
             .then((response) => {
                 if (response.error) {
                     cxt.emit('error', response.message)
                 } else {
-                    tags.value = response.data.tags;
+                    budgets.value = response.data.budgets;
                     ready.value = true;
                 }
             }).catch(error => {
@@ -61,7 +61,7 @@ export default {
             })
         })
         return {
-            tags,
+            budgets,
             ready
         }
     }

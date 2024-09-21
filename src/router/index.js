@@ -6,6 +6,8 @@ import User from './../components/AppUsersEdit.vue'
 import Security from '../components/security'
 import Tags from './../components/AppTags.vue'
 import AppTagsAddEdit from './../components/AppTagsAddEdit.vue'
+import Budgets from './../components/AppBudgets.vue'
+import AppBudgetsAddEdit from './../components/AppBudgetsAddEdit.vue'
 
 const routes = [
     {
@@ -37,6 +39,16 @@ const routes = [
         path: '/admin/dashboard/tags/:tagId',
         name: 'TagsAddEdit',
         component: AppTagsAddEdit,
+    },
+    {
+        path: '/admin/dashboard/budgets',
+        name: 'Budgets',
+        component: Budgets,
+    },
+    {
+        path: '/admin/dashboard/budgets/:budgetId',
+        name: 'BudgetsAddEdit',
+        component: AppBudgetsAddEdit,
     }
 ]
 
