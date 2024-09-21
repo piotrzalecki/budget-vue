@@ -29,6 +29,9 @@
               <li>
                 <router-link class="dropdown-item" to="/admin/users/0">Add User</router-link>
               </li>
+              <li>
+                <router-link class="dropdown-item" to="/admin/dashboard/tags">Tags</router-link>
+              </li>
             </ul>
 
           </li>

@@ -9,13 +9,13 @@ let Security = {
         }
     },
 
-    requestOptions: function (payload) {
+    requestOptions: function (payload, method = "POST") {
         const headers = new Headers();
         headers.append("Content-Type", "application/json");
         headers.append("Authorization", "Bearer " + store.token);
 
         return {
-            method: "POST",
+            method: method,
             body: JSON.stringify(payload),
             headers: headers
         }

@@ -4,6 +4,8 @@ import LoginComposition from './../components/AppLoginComposition.vue'
 import Users from './../components/AppUsers.vue'
 import User from './../components/AppUsersEdit.vue'
 import Security from '../components/security'
+import Tags from './../components/AppTags.vue'
+import AppTagsAddEdit from './../components/AppTagsAddEdit.vue'
 
 const routes = [
     {
@@ -25,6 +27,16 @@ const routes = [
         path: '/admin/users/:userId',
         name: 'User',
         component: User,
+    },
+    {
+        path: '/admin/dashboard/tags',
+        name: 'Tags',
+        component: Tags,
+    },
+    {
+        path: '/admin/dashboard/tags/:tagId',
+        name: 'TagsAddEdit',
+        component: AppTagsAddEdit,
     }
 ]
 
