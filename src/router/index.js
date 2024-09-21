@@ -9,6 +9,8 @@ import AppTagsAddEdit from './../components/AppTagsAddEdit.vue'
 import Budgets from './../components/AppBudgets.vue'
 import AppBudgetsAddEdit from './../components/AppBudgetsAddEdit.vue'
 import Logs from './../components/AppLogs.vue'
+import TransactionsRecurrences from './../components/AppTransactionsRecurrences.vue'
+import TransactionsRecurrencesAdd from './../components/AppTransactionsRecurrencesAdd.vue'
 
 const routes = [
     {
@@ -55,6 +57,16 @@ const routes = [
         path: '/admin/dashboard/logs',
         name: 'Logs',
         component: Logs,
+    },
+    {
+        path: '/admin/dashboard/transactions-recurrences',
+        name: 'TransactionsRecurrences',
+        component: TransactionsRecurrences,
+    },
+    {
+        path: '/admin/dashboard/transactions-recurrences/new',
+        name: 'TransactionsRecurrencesAdd',
+        component: TransactionsRecurrencesAdd,
     },
 ]
 

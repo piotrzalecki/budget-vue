@@ -38,6 +38,9 @@
               <li>
                 <router-link class="dropdown-item" to="/admin/dashboard/logs">Logs</router-link>
               </li>
+              <li>
+                <router-link class="dropdown-item" to="/admin/dashboard/transactions-recurrences">Transaction Recurrences</router-link>
+              </li>
             </ul>
 
           </li>
