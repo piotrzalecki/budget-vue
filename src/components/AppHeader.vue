@@ -2,7 +2,7 @@
 <template>
   <nav class="navbar navbar-expand-lg bg-body-tertiary" data-bs-theme="dark">
     <div class="container-fluid">
-      <a class="navbar-brand" href="#">Navbar</a>
+      <a class="navbar-brand" href="#">Budget</a>
       <button
         class="navbar-toggler"
         type="button"
@@ -23,6 +23,9 @@
             <a href="#" class="nav-link dropdown-toggle" id="navBarDropDown" role="button" data-bs-toggle="dropdown" aria-expanded="false">Admin</a>
 
             <ul class="dropdown-menu" aria-labelledby="navBarDropDown">
+              <li>
+                <router-link class="dropdown-item" to="/admin/dashboard/transactions">Transactions</router-link>
+              </li>
               <li>
                 <router-link class="dropdown-item" to="/admin/users">Manage Users</router-link>
               </li>

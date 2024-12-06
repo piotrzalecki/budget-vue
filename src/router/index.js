@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import Body from './../components/AppBody.vue'
+// import Body from './../components/AppBody.vue'
 import LoginComposition from './../components/AppLoginComposition.vue'
 import Users from './../components/AppUsers.vue'
 import User from './../components/AppUsersEdit.vue'
@@ -11,12 +11,15 @@ import AppBudgetsAddEdit from './../components/AppBudgetsAddEdit.vue'
 import Logs from './../components/AppLogs.vue'
 import TransactionsRecurrences from './../components/AppTransactionsRecurrences.vue'
 import TransactionsRecurrencesAdd from './../components/AppTransactionsRecurrencesAdd.vue'
+import TransactionsAddEdit from './../components/AppTransactionsAddEdit.vue'
+import Transactions from './../components/AppTransactions.vue'
+import TransactionDetails from './../components/AppTransactionDetails.vue'
 
 const routes = [
     {
         path: '/',
         name: 'Home',
-        component: Body,
+        component: Transactions,
     },
     {
         path: '/login',
@@ -67,6 +70,21 @@ const routes = [
         path: '/admin/dashboard/transactions-recurrences/new',
         name: 'TransactionsRecurrencesAdd',
         component: TransactionsRecurrencesAdd,
+    },
+    {
+        path: '/admin/dashboard/transactions',
+        name: 'Transactions',
+        component: Transactions,
+    },
+    {
+        path: '/admin/dashboard/transactions/details/:transactionId',
+        name: 'TransactionDetails',
+        component: TransactionDetails,
+    },
+    {
+        path: '/admin/dashboard/transactions/edit/:transactionId',
+        name: 'TransactionsAddEdit',
+        component: TransactionsAddEdit,
     },
 ]
 
