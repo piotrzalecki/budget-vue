@@ -96,19 +96,7 @@ export default {
               return b.active - a.active;
             });
 
-            transactions.value.forEach((transaction) => {
-              // Add to total quotes
-              allTransactionsQuote.value += parseFloat(transaction.quote) || 0;
-
-              // Add to active/inactive quotes based on status
-              if (transaction.active) {
-                activeTransactionsQuote.value +=
-                  parseFloat(transaction.quote) || 0;
-              } else {
-                inactiveTransactionsQuote.value +=
-                  parseFloat(transaction.quote) || 0;
-              }
-            });
+            recalculateQuotes();
 
             ready.value = true;
           }
@@ -117,6 +105,21 @@ export default {
           cxt.emit("error", error);
         });
     });
+
+    function recalculateQuotes() {
+      allTransactionsQuote.value = 0;
+      activeTransactionsQuote.value = 0;
+      inactiveTransactionsQuote.value = 0;
+
+      transactions.value.forEach((transaction) => {
+        allTransactionsQuote.value += parseFloat(transaction.quote) || 0;
+        if (transaction.active) {
+          activeTransactionsQuote.value += parseFloat(transaction.quote) || 0;
+        } else {
+          inactiveTransactionsQuote.value += parseFloat(transaction.quote) || 0;
+        }
+      });
+    }
 
     function setStatus(transactionId, status) {
       const payload = {
@@ -142,6 +145,8 @@ export default {
             transactions.value = [...transactions.value].sort((a, b) => {
               return b.active - a.active;
             });
+            // Recalculate quotes after status update
+            recalculateQuotes();
           }
         })
         .catch((error) => {
@@ -189,6 +194,7 @@ export default {
       inactiveTransactionsQuote,
       setStatus,
       setAllActive,
+      recalculateQuotes,
     };
   },
 };
