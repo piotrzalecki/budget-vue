@@ -3,6 +3,17 @@
     <div class="row">
       <div class="col mb-1 mt-3">
         <h1 class="float-start">Transactions</h1>
+        <select
+          class="form-select float-end m-1"
+          style="width: auto"
+          v-model="selectedBudget"
+          @change="filterTransactions"
+        >
+          <option value="all">All Budgets</option>
+          <option v-for="budget in budgets" :key="budget.id" :value="budget.id">
+            {{ budget.name }}
+          </option>
+        </select>
         <button class="btn btn-primary float-end m-1" @click="setAllActive">
           Set all active
         </button>
@@ -30,7 +41,7 @@
         </thead>
         <tbody>
           <tr
-            v-for="t in transactions"
+            v-for="t in filteredTransactions"
             :key="t.id"
             :class="{ 'table-secondary': !t.active }"
           >
@@ -78,6 +89,9 @@ export default {
     let allTransactionsQuote = ref(0);
     let activeTransactionsQuote = ref(0);
     let inactiveTransactionsQuote = ref(0);
+    let budgets = ref([]);
+    let selectedBudget = ref("all");
+    let filteredTransactions = ref([]);
 
     onBeforeMount(() => {
       Security.requireToken();
@@ -95,10 +109,26 @@ export default {
             transactions.value = response.data.transactions.sort((a, b) => {
               return b.active - a.active;
             });
-
+            // Set filteredTransactions before calculating quotes
+            filteredTransactions.value = transactions.value;
             recalculateQuotes();
-
             ready.value = true;
+          }
+        })
+        .catch((error) => {
+          cxt.emit("error", error);
+        });
+
+      fetch(
+        process.env.VUE_APP_API_URL + "/admin/dashboard/budgets",
+        Security.requestOptions()
+      )
+        .then((response) => response.json())
+        .then((response) => {
+          if (response.error) {
+            cxt.emit("error", response.message);
+          } else {
+            budgets.value = response.data.budgets;
           }
         })
         .catch((error) => {
@@ -111,7 +141,13 @@ export default {
       activeTransactionsQuote.value = 0;
       inactiveTransactionsQuote.value = 0;
 
-      transactions.value.forEach((transaction) => {
+      // Use transactions.value instead of filteredTransactions.value for "All Budgets" view
+      const transactionsToCalculate =
+        selectedBudget.value === "all"
+          ? transactions.value
+          : filteredTransactions.value;
+
+      transactionsToCalculate.forEach((transaction) => {
         allTransactionsQuote.value += parseFloat(transaction.quote) || 0;
         if (transaction.active) {
           activeTransactionsQuote.value += parseFloat(transaction.quote) || 0;
@@ -186,6 +222,17 @@ export default {
       });
     }
 
+    function filterTransactions() {
+      if (selectedBudget.value === "all") {
+        filteredTransactions.value = transactions.value;
+      } else {
+        filteredTransactions.value = transactions.value.filter(
+          (t) => t.budget.id === selectedBudget.value
+        );
+      }
+      recalculateQuotes();
+    }
+
     return {
       transactions,
       ready,
@@ -195,6 +242,10 @@ export default {
       setStatus,
       setAllActive,
       recalculateQuotes,
+      budgets,
+      selectedBudget,
+      filteredTransactions,
+      filterTransactions,
     };
   },
 };
