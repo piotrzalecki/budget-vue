@@ -3,8 +3,11 @@
     <div class="row">
       <div class="col mb-1 mt-3">
         <h1 class="float-start">Transactions</h1>
+        <button class="btn btn-primary float-end m-1" @click="setAllActive">
+          Set all active
+        </button>
         <router-link
-          class="btn btn-success float-end"
+          class="btn btn-success float-end m-1"
           :to="`/admin/dashboard/transactions/edit/0`"
           >New transaction</router-link
         >
@@ -62,6 +65,8 @@
 <script>
 import { ref, onMounted, onBeforeMount } from "vue";
 import Security from "./security.js";
+import notie from "notie";
+
 export default {
   name: "AppTransactions",
   props: {},
@@ -144,6 +149,38 @@ export default {
         });
     }
 
+    function setAllActive() {
+      notie.confirm({
+        text: "Are you sure you want to set all transactions to active?",
+        submitText: "Yes",
+        cancelText: "Cancel",
+        submitCallback: () => {
+          fetch(
+            `${process.env.VUE_APP_API_URL}/admin/dashboard/transactions/set-all-active`,
+            Security.requestOptions({}, "POST")
+          )
+            .then((response) => response.json())
+            .then((data) => {
+              if (data.error) {
+                cxt.emit("error", data.message);
+              } else {
+                cxt.emit("success", "All transactions set to active!");
+                // Update all transactions to active
+                transactions.value.forEach((transaction) => {
+                  transaction.active = true;
+                });
+                // Update quotes
+                activeTransactionsQuote.value = allTransactionsQuote.value;
+                inactiveTransactionsQuote.value = 0;
+              }
+            })
+            .catch((error) => {
+              cxt.emit("error", error);
+            });
+        },
+      });
+    }
+
     return {
       transactions,
       ready,
@@ -151,6 +188,7 @@ export default {
       activeTransactionsQuote,
       inactiveTransactionsQuote,
       setStatus,
+      setAllActive,
     };
   },
 };
