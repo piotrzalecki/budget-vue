@@ -1,0 +1,60 @@
+{
+  "name": "budget-vue",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "run-p type-check \"build-only {@}\" --",
+    "preview": "vite preview",
+    "build-only": "vite build",
+    "type-check": "vue-tsc --build",
+    "lint": "eslint . --ext .vue,.js,.ts,.jsx,.tsx --fix",
+    "lint:check": "eslint . --ext .vue,.js,.ts,.jsx,.tsx",
+    "lint:fix": "eslint . --ext .vue,.js,.ts,.jsx,.tsx --fix",
+    "format": "prettier --write \"src/**/*.{vue,js,ts,jsx,tsx,json,css,scss,md}\"",
+    "format:check": "prettier --check \"src/**/*.{vue,js,ts,jsx,tsx,json,css,scss,md}\"",
+    "format:fix": "prettier --write \"src/**/*.{vue,js,ts,jsx,tsx,json,css,scss,md}\"",
+    "code:check": "run-p lint:check format:check type-check",
+    "code:fix": "run-p lint:fix format:fix",
+    "prepare": "husky install"
+  },
+  "dependencies": {
+    "@mdi/font": "^7.4.47",
+    "axios": "^1.10.0",
+    "echarts": "^5.6.0",
+    "pinia": "^3.0.3",
+    "vue": "^3.5.17",
+    "vue-echarts": "^7.0.3",
+    "vue-router": "^4.5.1",
+    "vuetify": "^3.8.12"
+  },
+  "devDependencies": {
+    "@tsconfig/node22": "^22.0.2",
+    "@types/node": "^22.15.32",
+    "@vitejs/plugin-vue": "^6.0.0",
+    "@vue/eslint-config-prettier": "^10.2.0",
+    "@vue/eslint-config-typescript": "^14.5.1",
+    "@vue/tsconfig": "^0.7.0",
+    "eslint": "^9.29.0",
+    "eslint-plugin-vue": "~10.2.0",
+    "husky": "^9.0.11",
+    "jiti": "^2.4.2",
+    "lint-staged": "^15.2.2",
+    "npm-run-all2": "^8.0.4",
+    "prettier": "3.5.3",
+    "typescript": "~5.8.0",
+    "vite": "^7.0.0",
+    "vite-plugin-vue-devtools": "^7.7.7",
+    "vue-tsc": "^2.2.10"
+  },
+  "lint-staged": {
+    "*.{vue,js,ts,jsx,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,css,scss,md}": [
+      "prettier --write"
+    ]
+  }
+}
