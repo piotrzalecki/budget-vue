@@ -24,4 +24,7 @@ themeStore.loadFromStorage()
 const sessionStore = useSessionStore()
 sessionStore.loadFromStorage()
 
-app.mount('#app')
+// Wait for router to be ready before mounting
+router.isReady().then(() => {
+  app.mount('#app')
+})

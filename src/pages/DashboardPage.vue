@@ -31,5 +31,5 @@
 </template>
 
 <script setup lang="ts">
-// Dashboard logic will be implemented here
+  // Dashboard logic will be implemented here
 </script>

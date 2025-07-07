@@ -18,5 +18,5 @@
 </template>
 
 <script setup lang="ts">
-// Transactions logic will be implemented here
+  // Transactions logic will be implemented here
 </script>

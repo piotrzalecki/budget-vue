@@ -18,5 +18,5 @@
 </template>
 
 <script setup lang="ts">
-// Settings logic will be implemented here
+  // Settings logic will be implemented here
 </script>

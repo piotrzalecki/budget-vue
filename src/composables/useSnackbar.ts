@@ -23,6 +23,10 @@ export const useSnackbar = () => {
     }
   }
 
+  const push = (text: string, color: string = 'success', timeout: number = 3000) => {
+    showSnackbar({ text, color, timeout })
+  }
+
   const hideSnackbar = () => {
     snackbar.value.show = false
   }
@@ -30,6 +34,7 @@ export const useSnackbar = () => {
   return {
     snackbar,
     showSnackbar,
+    push,
     hideSnackbar,
   }
 }
