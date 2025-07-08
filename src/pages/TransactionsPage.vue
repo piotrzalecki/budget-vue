@@ -1,14 +1,16 @@
 <template>
   <v-container>
+    <!-- Page Header -->
     <v-row>
       <v-col cols="12" class="d-flex align-center">
         <h1 class="text-h4 mb-4">Transactions</h1>
-        <v-spacer />
-        <v-btn color="primary" prepend-icon="mdi-plus" @click="openAddDrawer">
-          Add Transaction
-        </v-btn>
       </v-col>
     </v-row>
+
+    <!-- Filters -->
+    <TransactionFilters v-model="transactionsStore.filters" @update:model-value="onFiltersChange" />
+
+    <!-- Table -->
     <v-row>
       <v-col cols="12">
         <v-card>
@@ -28,6 +30,16 @@
       </v-col>
     </v-row>
 
+    <!-- Floating Action Button -->
+    <v-btn
+      color="primary"
+      icon="mdi-plus"
+      size="large"
+      class="fab"
+      elevation="8"
+      @click="openAddDrawer"
+    />
+
     <!-- Transaction Form Drawer -->
     <TransactionFormDrawer
       :open="drawerOpen"
@@ -41,6 +53,7 @@
 
 <script setup lang="ts">
   import { onMounted, ref } from 'vue'
+  import TransactionFilters from '../components/TransactionFilters.vue'
   import TransactionFormDrawer from '../components/TransactionFormDrawer.vue'
   import TransactionTable from '../components/TransactionTable.vue'
   import { useSnackbar } from '../composables/useSnackbar'
@@ -55,8 +68,12 @@
   const saving = ref(false)
 
   onMounted(() => {
-    transactionsStore.fetch()
+    transactionsStore.fetchWithFilters()
   })
+
+  function onFiltersChange() {
+    transactionsStore.fetchWithFilters()
+  }
 
   function openAddDrawer() {
     editingId.value = null
@@ -122,3 +139,19 @@
     itemsPerPage.value = newItemsPerPage
   }
 </script>
+
+<style scoped>
+  .fab {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 1000;
+  }
+
+  @media (max-width: 600px) {
+    .fab {
+      bottom: 16px;
+      right: 16px;
+    }
+  }
+</style>

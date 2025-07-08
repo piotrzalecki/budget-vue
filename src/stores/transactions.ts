@@ -21,6 +21,14 @@ export const useTransactionsStore = defineStore('transactions', () => {
   const api = useApi()
   const tagsStore = useTagsStore()
 
+  // Filter state
+  const filters = ref({
+    from: '',
+    to: '',
+    tagIds: [] as number[],
+    search: '',
+  })
+
   // Helper function to convert API response to our format
   const processTransaction = (transaction: any): Transaction => {
     // If amount is a string (like "15.50"), convert to pence
@@ -75,11 +83,48 @@ export const useTransactionsStore = defineStore('transactions', () => {
     }
   }
 
+  const fetchWithFilters = async () => {
+    loading.value = true
+    try {
+      // Ensure tags are loaded first
+      if (tagsStore.list.length === 0) {
+        await tagsStore.fetch()
+      }
+
+      const params = new URLSearchParams()
+      if (filters.value.from) params.append('from', filters.value.from)
+      if (filters.value.to) params.append('to', filters.value.to)
+
+      const response = await api.get(`/transactions?${params.toString()}`)
+      const rawTransactions = response.data.data || response.data || []
+      let filteredTransactions = rawTransactions.map(processTransaction)
+
+      // Apply client-side filters
+      if (filters.value.tagIds.length > 0) {
+        filteredTransactions = filteredTransactions.filter((transaction: Transaction) =>
+          transaction.tags.some((tag: Tag) => filters.value.tagIds.includes(tag.id))
+        )
+      }
+
+      if (filters.value.search) {
+        const searchLower = filters.value.search.toLowerCase()
+        filteredTransactions = filteredTransactions.filter((transaction: Transaction) =>
+          transaction.note.toLowerCase().includes(searchLower)
+        )
+      }
+
+      list.value = filteredTransactions
+    } catch (error) {
+      console.error('Failed to fetch transactions:', error)
+      list.value = []
+    } finally {
+      loading.value = false
+    }
+  }
+
   // Helper method to refresh with current filters
   const refresh = async () => {
-    // For now, just fetch all transactions
-    // In the future, we could store the current filters and reuse them
-    await fetch()
+    await fetchWithFilters()
   }
 
   const add = async (transaction: {
@@ -98,9 +143,8 @@ export const useTransactionsStore = defineStore('transactions', () => {
       }
       const response = await api.post('/transactions', apiPayload)
 
-      // Instead of trying to process the response and add to list,
-      // refresh the entire transactions list to get complete data from server
-      await refresh()
+      // Refresh the entire transactions list to get complete data from server
+      await fetchWithFilters()
 
       return response.data
     } catch (error) {
@@ -111,11 +155,9 @@ export const useTransactionsStore = defineStore('transactions', () => {
 
   const softDelete = async (id: number) => {
     try {
-      await api.delete(`/transactions/${id}`)
-      const index = list.value.findIndex(t => t.id === id)
-      if (index !== -1) {
-        list.value.splice(index, 1)
-      }
+      await api.patch(`/transactions/${id}`, { deleted: true })
+      // Refresh the list to get updated data from server
+      await fetchWithFilters()
     } catch (error) {
       console.error('Failed to delete transaction:', error)
       throw error
@@ -141,9 +183,8 @@ export const useTransactionsStore = defineStore('transactions', () => {
       }
       const response = await api.patch(`/transactions/${id}`, apiPayload)
 
-      // Instead of trying to process the response and update locally,
-      // refresh the entire transactions list to get complete data from server
-      await refresh()
+      // Refresh the entire transactions list to get complete data from server
+      await fetchWithFilters()
 
       return response.data
     } catch (error) {
@@ -155,7 +196,9 @@ export const useTransactionsStore = defineStore('transactions', () => {
   return {
     list,
     loading,
+    filters,
     fetch,
+    fetchWithFilters,
     refresh,
     add,
     softDelete,

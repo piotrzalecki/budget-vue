@@ -1,61 +1,34 @@
-Ticket — “TransactionFormDrawer”
+Ticket — “Transactions page integration”
 
 (Epic 4 – CRUD Endpoints)
 
-This task builds the side-drawer form used to create or edit a single transaction. It slides in from the right (or bottom on mobile), re-uses Vuetify components, and talks to the Pinia store / API.
-
-Deliverable	Details
-Drawer component file	src/components/TransactionFormDrawer.vue
-Props	open (Boolean) – controls visibility  editId (Number | null) – if non-null, load existing txn for editing
-Emits	save(payload), close()
-Fields	• Amount (MoneyInput with £ prefix)  • Date (v-date-picker inline)  • Tags (TagMultiSelect chips)  • Note (v-text-field multiline)
-Validation	All fields require client-side rules (amount ≠ 0, date present). Use Vuetify v-form + rules.
-UX	• Opens with width 400 px, full-height on desktop; switches to full-screen modal on <600 px screens via mobile-breakpoint="960" prop.  • Submit button disabled until form valid.  • Pressing Enter in any field triggers save.
-Loading state	Show skeleton loader while fetching existing txn (edit mode).
-Integration	Parent page (TransactionsPage) controls open and handles save event → calls Pinia action (transactions.add or transactions.update).
-Unit test	• Renders correct initial values in edit mode.  • Emits save with parsed pence amount.  • Required fields cause validation errors.
-
+This ticket stitches together everything you’ve built so far (router, Pinia store, TransactionTable, and the form drawer) into a fully-functional TransactionsPage.vue. After it’s done, you’ll be able to open the page, filter a date range, add/edit/delete rows, and see the table update instantly.
 
 ⸻
 
-Template sketch
+1  Responsibilities of the page
 
-<v-navigation-drawer
-  v-model="isOpen"
-  location="right"
-  width="400"
-  temporary
->
-  <v-card flat>
-    <v-card-title>{{ editMode ? 'Edit' : 'Add' }} Transaction</v-card-title>
+Area	What it must do	UI element
+Data fetch	Ask the transactions Pinia store for rows when the page loads and whenever filters change.	lifecycle hook / watch
+Filters	Date-range (2 pickers or a preset “This Month”), multi-tag select, text search on note.	Small toolbar above table
+Table	Render via <TransactionTable>; pass props items, loading, page, itemsPerPage, total; handle edit, delete, page-change emits.	Already implemented component
+Add / edit	Floating Action Button (FAB) ↗ opens TransactionFormDrawer; edit event from table opens the same drawer in edit mode.	<v-btn icon="mdi-plus">
+Soft-delete	Confirmation dialog → invoke transactions.softDelete(id) → toast on success.	<ConfirmDialog>
+Snackbar	Any success / error goes through useSnackbar().	Bottom overlay
+Pagination	For now client-side; table displays Vuetify paginator.	Provided by v-data-table
+Loading state	Show table’s built-in progress and/or a global linear bar while fetch in flight.	loading prop
 
-    <v-card-text>
-      <v-form ref="form" v-model="valid">
-        <MoneyInput v-model="amount"  :error-messages="err.amount"/>
-        <v-date-picker v-model="tDate" color="primary" />
-        <TagMultiSelect v-model="tagIds" />
-        <v-text-field v-model="note" label="Note" rows="2" multiline />
-      </v-form>
-    </v-card-text>
 
-    <v-card-actions class="justify-end">
-      <v-btn text  @click="$emit('close')">Cancel</v-btn>
-      <v-btn :disabled="!valid" color="primary" @click="onSave">
-        {{ editMode ? 'Update' : 'Save' }}
-      </v-btn>
-    </v-card-actions>
-  </v-card>
-</v-navigation-drawer>
 
-MoneyInput converts pounds ↔ pence; TagMultiSelect pulls tag list from Pinia.
+3  Acceptance criteria
 
-⸻
+Test	Expected
+Page loads → calls store.fetch and shows rows	✔
+Typing in search field triggers new fetch	✔
+Clicking “+” opens empty drawer and saving inserts row, table refreshes	✔
+Clicking pencil opens drawer pre-filled with row values	✔
+Clicking trash asks confirm and soft-deletes, row disappears	✔
+Pagination next/prev changes rows shown	✔
+mobile (<600 px) — drawer is full-screen, filters stack vertically	✔
 
-Acceptance Criteria
-	1.	Drawer slides in/out smoothly and is responsive.
-	2.	Form validation blocks save until required fields are filled.
-	3.	Fires save({...}) with { amount_pence, t_date, tag_ids, note }.
-	4.	Editing an existing txn pre-populates fields and updates on save.
-	5.	Unit test passes in CI.
-
-When these conditions are met, “TransactionFormDrawer” is done.
+When all checks pass and the Transactions page feels cohesive, the “Transactions page integration” ticket is complete.

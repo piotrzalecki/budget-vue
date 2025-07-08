@@ -2,9 +2,9 @@
   <v-navigation-drawer
     v-model="isOpen"
     location="right"
-    width="400"
+    :width="$vuetify.display.mdAndUp ? 400 : '100%'"
     temporary
-    :mobile-breakpoint="960"
+    :mobile-breakpoint="600"
   >
     <v-card flat height="100%">
       <v-card-title class="d-flex align-center">
