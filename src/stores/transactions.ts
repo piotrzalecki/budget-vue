@@ -1,13 +1,14 @@
+import { useApi } from '@/composables/useApi'
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import { useApi } from '@/composables/useApi'
+import type { Tag } from './tags'
 
 export interface Transaction {
   id: number
   amount_pence: number
-  description: string
-  date: string
-  tags: string[]
+  note: string
+  t_date: string
+  tags: Tag[]
   created_at: string
   updated_at: string
 }
@@ -21,11 +22,11 @@ export const useTransactionsStore = defineStore('transactions', () => {
     loading.value = true
     try {
       const params = new URLSearchParams()
-      if (startDate) params.append('start_date', startDate)
-      if (endDate) params.append('end_date', endDate)
+      if (startDate) params.append('from', startDate)
+      if (endDate) params.append('to', endDate)
 
       const response = await api.get(`/transactions?${params.toString()}`)
-      list.value = response.data
+      list.value = response.data.data || []
     } catch (error) {
       console.error('Failed to fetch transactions:', error)
     } finally {
@@ -36,7 +37,7 @@ export const useTransactionsStore = defineStore('transactions', () => {
   const add = async (transaction: Omit<Transaction, 'id' | 'created_at' | 'updated_at'>) => {
     try {
       const response = await api.post('/transactions', transaction)
-      list.value.push(response.data)
+      list.value.push(response.data.data || response.data)
       return response.data
     } catch (error) {
       console.error('Failed to add transaction:', error)
@@ -47,7 +48,7 @@ export const useTransactionsStore = defineStore('transactions', () => {
   const softDelete = async (id: number) => {
     try {
       await api.delete(`/transactions/${id}`)
-      const index = list.value.findIndex((t) => t.id === id)
+      const index = list.value.findIndex(t => t.id === id)
       if (index !== -1) {
         list.value.splice(index, 1)
       }

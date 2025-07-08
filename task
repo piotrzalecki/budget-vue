@@ -1,0 +1,141 @@
+Ticket — “Implement TransactionTable component”
+
+(Epic 4 – CRUD Endpoints)
+
+This ticket delivers the core list view for ledger entries: a Vuetify-powered table that shows transactions, colours income/expense, supports quick actions, and plays nicely with filters & pagination.
+
+⸻
+
+1  Responsibility
+
+What the component must do	Why
+Render a paginated table of Transaction objects	Main way to browse history
+Colour-code amount (green = income, red = expense)	Instant visual cue
+Accept props: items, loading, page, itemsPerPage, total	Allows parent to drive server-side or client-side paging
+Emit events: edit(id), delete(id), page-change({page,itemsPerPage})	Keeps component stateless; parent Vuex/Pinia store handles data
+Show skeleton loader or progress bar when loading true	Good UX
+Support tag chips inside a column	Useful for filtering later
+
+
+⸻
+
+2  API (props & emits)
+
+Prop	Type	Default	Notes
+items	Transaction[]	[]	Each object: { id, t_date, amount_pence, tags, note }
+loading	Boolean	false	Controls linear progress bar
+page	Number	1	Current page (1-based)
+itemsPerPage	Number	50	Page size
+total	Number	items.length	For server-side pagination
+
+Emit	Payload	When
+edit	id:Number	User clicks pencil icon
+delete	id:Number	User clicks trash icon
+page-change	{page,itemsPerPage}	v-data-table options update
+
+
+⸻
+
+3  Implementation outline
+
+<!-- src/components/TransactionTable.vue -->
+<template>
+  <v-data-table
+    :items="items"
+    :headers="headers"
+    :items-per-page="itemsPerPage"
+    :page="page"
+    :loading="loading"
+    :server-items-length="total"
+    show-current-page
+    density="compact"
+    class="elevation-1 rounded"
+    @update:options="onOptions"
+  >
+    <template #item.amount_pence="{ item }">
+      <span :class="item.amount_pence < 0 ? 'text-error' : 'text-success'">
+        {{ money(item.amount_pence) }}
+      </span>
+    </template>
+
+    <template #item.tags="{ item }">
+      <v-chip
+        v-for="t in item.tags"
+        :key="t.id"
+        size="x-small"
+        class="ma-1"
+        color="secondary"
+        text-color="onSecondary"
+      >
+        {{ t.name }}
+      </v-chip>
+    </template>
+
+    <template #item.actions="{ item }">
+      <v-btn icon size="small" @click="$emit('edit', item.id)">
+        <v-icon>mdi-pencil</v-icon>
+      </v-btn>
+      <v-btn icon size="small" @click="$emit('delete', item.id)">
+        <v-icon color="error">mdi-delete</v-icon>
+      </v-btn>
+    </template>
+  </v-data-table>
+
+  <v-progress-linear
+    v-if="loading"
+    indeterminate
+    color="primary"
+  />
+</template>
+
+<script setup lang="ts">
+import { computed } from 'vue'
+import { useMoneyFormat } from '@/composables/useMoneyFormat'
+
+defineProps<{
+  items: Transaction[]
+  loading?: boolean
+  page?: number
+  itemsPerPage?: number
+  total?: number
+}>()
+const emit = defineEmits(['edit', 'delete', 'page-change'])
+const money = useMoneyFormat()
+
+const headers = [
+  { title: 'Date',  value: 't_date', sortable: true },
+  { title: 'Note',  value: 'note',   sortable: false },
+  { title: 'Tags',  value: 'tags',   sortable: false },
+  { title: 'Amount',value: 'amount_pence', sortable: true, align:'end' },
+  { title: '',      value: 'actions', sortable: false, align:'end' }
+]
+
+function onOptions ({ page, itemsPerPage }) {
+  emit('page-change', { page, itemsPerPage })
+}
+</script>
+
+
+⸻
+
+4  Styling details
+	•	density="compact" — tight rows.
+	•	elevation-1 rounded — subtle card look.
+	•	Use theme colours (text-error, text-success, secondary) for consistency.
+
+⸻
+
+5  Unit tests (Vitest)
+	1.	Renders correct amount of rows.
+	2.	Emits edit & delete events.
+	3.	page-change emission when user hits next page.
+
+⸻
+
+6  Acceptance Criteria
+	•	Parent page feeds data; table shows rows with coloured amounts and tag chips.
+	•	Pencil opens edit drawer; trash triggers soft-delete confirm.
+	•	Pagination works client- or server-side.
+	•	All props reactive; rerender when store updates.
+
+When these criteria pass (component visible in Transactions page), the “Implement TransactionTable component” ticket is complete.
