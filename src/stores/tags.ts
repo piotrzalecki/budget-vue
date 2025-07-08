@@ -1,6 +1,6 @@
+import { useApi } from '@/composables/useApi'
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import { useApi } from '@/composables/useApi'
 
 export interface Tag {
   id: number
@@ -18,9 +18,11 @@ export const useTagsStore = defineStore('tags', () => {
     loading.value = true
     try {
       const response = await api.get('/tags')
-      list.value = response.data
+      // Handle different response structures
+      list.value = response.data.data || response.data || []
     } catch (error) {
       console.error('Failed to fetch tags:', error)
+      list.value = []
     } finally {
       loading.value = false
     }
@@ -29,8 +31,9 @@ export const useTagsStore = defineStore('tags', () => {
   const add = async (tag: Omit<Tag, 'id' | 'created_at'>) => {
     try {
       const response = await api.post('/tags', tag)
-      list.value.push(response.data)
-      return response.data
+      const newTag = response.data.data || response.data
+      list.value.push(newTag)
+      return newTag
     } catch (error) {
       console.error('Failed to add tag:', error)
       throw error
@@ -40,7 +43,7 @@ export const useTagsStore = defineStore('tags', () => {
   const remove = async (id: number) => {
     try {
       await api.delete(`/tags/${id}`)
-      const index = list.value.findIndex((t) => t.id === id)
+      const index = list.value.findIndex(t => t.id === id)
       if (index !== -1) {
         list.value.splice(index, 1)
       }

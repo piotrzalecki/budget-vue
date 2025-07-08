@@ -1,141 +1,61 @@
-Ticket — “Implement TransactionTable component”
+Ticket — “TransactionFormDrawer”
 
 (Epic 4 – CRUD Endpoints)
 
-This ticket delivers the core list view for ledger entries: a Vuetify-powered table that shows transactions, colours income/expense, supports quick actions, and plays nicely with filters & pagination.
+This task builds the side-drawer form used to create or edit a single transaction. It slides in from the right (or bottom on mobile), re-uses Vuetify components, and talks to the Pinia store / API.
 
-⸻
-
-1  Responsibility
-
-What the component must do	Why
-Render a paginated table of Transaction objects	Main way to browse history
-Colour-code amount (green = income, red = expense)	Instant visual cue
-Accept props: items, loading, page, itemsPerPage, total	Allows parent to drive server-side or client-side paging
-Emit events: edit(id), delete(id), page-change({page,itemsPerPage})	Keeps component stateless; parent Vuex/Pinia store handles data
-Show skeleton loader or progress bar when loading true	Good UX
-Support tag chips inside a column	Useful for filtering later
-
-
-⸻
-
-2  API (props & emits)
-
-Prop	Type	Default	Notes
-items	Transaction[]	[]	Each object: { id, t_date, amount_pence, tags, note }
-loading	Boolean	false	Controls linear progress bar
-page	Number	1	Current page (1-based)
-itemsPerPage	Number	50	Page size
-total	Number	items.length	For server-side pagination
-
-Emit	Payload	When
-edit	id:Number	User clicks pencil icon
-delete	id:Number	User clicks trash icon
-page-change	{page,itemsPerPage}	v-data-table options update
+Deliverable	Details
+Drawer component file	src/components/TransactionFormDrawer.vue
+Props	open (Boolean) – controls visibility  editId (Number | null) – if non-null, load existing txn for editing
+Emits	save(payload), close()
+Fields	• Amount (MoneyInput with £ prefix)  • Date (v-date-picker inline)  • Tags (TagMultiSelect chips)  • Note (v-text-field multiline)
+Validation	All fields require client-side rules (amount ≠ 0, date present). Use Vuetify v-form + rules.
+UX	• Opens with width 400 px, full-height on desktop; switches to full-screen modal on <600 px screens via mobile-breakpoint="960" prop.  • Submit button disabled until form valid.  • Pressing Enter in any field triggers save.
+Loading state	Show skeleton loader while fetching existing txn (edit mode).
+Integration	Parent page (TransactionsPage) controls open and handles save event → calls Pinia action (transactions.add or transactions.update).
+Unit test	• Renders correct initial values in edit mode.  • Emits save with parsed pence amount.  • Required fields cause validation errors.
 
 
 ⸻
 
-3  Implementation outline
+Template sketch
 
-<!-- src/components/TransactionTable.vue -->
-<template>
-  <v-data-table
-    :items="items"
-    :headers="headers"
-    :items-per-page="itemsPerPage"
-    :page="page"
-    :loading="loading"
-    :server-items-length="total"
-    show-current-page
-    density="compact"
-    class="elevation-1 rounded"
-    @update:options="onOptions"
-  >
-    <template #item.amount_pence="{ item }">
-      <span :class="item.amount_pence < 0 ? 'text-error' : 'text-success'">
-        {{ money(item.amount_pence) }}
-      </span>
-    </template>
+<v-navigation-drawer
+  v-model="isOpen"
+  location="right"
+  width="400"
+  temporary
+>
+  <v-card flat>
+    <v-card-title>{{ editMode ? 'Edit' : 'Add' }} Transaction</v-card-title>
 
-    <template #item.tags="{ item }">
-      <v-chip
-        v-for="t in item.tags"
-        :key="t.id"
-        size="x-small"
-        class="ma-1"
-        color="secondary"
-        text-color="onSecondary"
-      >
-        {{ t.name }}
-      </v-chip>
-    </template>
+    <v-card-text>
+      <v-form ref="form" v-model="valid">
+        <MoneyInput v-model="amount"  :error-messages="err.amount"/>
+        <v-date-picker v-model="tDate" color="primary" />
+        <TagMultiSelect v-model="tagIds" />
+        <v-text-field v-model="note" label="Note" rows="2" multiline />
+      </v-form>
+    </v-card-text>
 
-    <template #item.actions="{ item }">
-      <v-btn icon size="small" @click="$emit('edit', item.id)">
-        <v-icon>mdi-pencil</v-icon>
+    <v-card-actions class="justify-end">
+      <v-btn text  @click="$emit('close')">Cancel</v-btn>
+      <v-btn :disabled="!valid" color="primary" @click="onSave">
+        {{ editMode ? 'Update' : 'Save' }}
       </v-btn>
-      <v-btn icon size="small" @click="$emit('delete', item.id)">
-        <v-icon color="error">mdi-delete</v-icon>
-      </v-btn>
-    </template>
-  </v-data-table>
+    </v-card-actions>
+  </v-card>
+</v-navigation-drawer>
 
-  <v-progress-linear
-    v-if="loading"
-    indeterminate
-    color="primary"
-  />
-</template>
-
-<script setup lang="ts">
-import { computed } from 'vue'
-import { useMoneyFormat } from '@/composables/useMoneyFormat'
-
-defineProps<{
-  items: Transaction[]
-  loading?: boolean
-  page?: number
-  itemsPerPage?: number
-  total?: number
-}>()
-const emit = defineEmits(['edit', 'delete', 'page-change'])
-const money = useMoneyFormat()
-
-const headers = [
-  { title: 'Date',  value: 't_date', sortable: true },
-  { title: 'Note',  value: 'note',   sortable: false },
-  { title: 'Tags',  value: 'tags',   sortable: false },
-  { title: 'Amount',value: 'amount_pence', sortable: true, align:'end' },
-  { title: '',      value: 'actions', sortable: false, align:'end' }
-]
-
-function onOptions ({ page, itemsPerPage }) {
-  emit('page-change', { page, itemsPerPage })
-}
-</script>
-
+MoneyInput converts pounds ↔ pence; TagMultiSelect pulls tag list from Pinia.
 
 ⸻
 
-4  Styling details
-	•	density="compact" — tight rows.
-	•	elevation-1 rounded — subtle card look.
-	•	Use theme colours (text-error, text-success, secondary) for consistency.
+Acceptance Criteria
+	1.	Drawer slides in/out smoothly and is responsive.
+	2.	Form validation blocks save until required fields are filled.
+	3.	Fires save({...}) with { amount_pence, t_date, tag_ids, note }.
+	4.	Editing an existing txn pre-populates fields and updates on save.
+	5.	Unit test passes in CI.
 
-⸻
-
-5  Unit tests (Vitest)
-	1.	Renders correct amount of rows.
-	2.	Emits edit & delete events.
-	3.	page-change emission when user hits next page.
-
-⸻
-
-6  Acceptance Criteria
-	•	Parent page feeds data; table shows rows with coloured amounts and tag chips.
-	•	Pencil opens edit drawer; trash triggers soft-delete confirm.
-	•	Pagination works client- or server-side.
-	•	All props reactive; rerender when store updates.
-
-When these criteria pass (component visible in Transactions page), the “Implement TransactionTable component” ticket is complete.
+When these conditions are met, “TransactionFormDrawer” is done.
