@@ -30,13 +30,38 @@ export const useTagsStore = defineStore('tags', () => {
 
   const add = async (tag: Omit<Tag, 'id' | 'created_at'>) => {
     try {
-      const response = await api.post('/tags', tag)
-      const newTag = response.data.data || response.data
-      list.value.push(newTag)
-      return newTag
-    } catch (error) {
+      await api.post('/tags', { name: tag.name })
+      await fetch() // Refresh the list from the backend
+    } catch (error: any) {
       console.error('Failed to add tag:', error)
+      if (error.response?.status === 409) {
+        throw new Error('Tag name already exists.')
+      }
       throw error
+    }
+  }
+
+  const update = async (id: number, updates: Partial<Tag>) => {
+    try {
+      const response = await api.patch(`/tags/${id}`, { name: updates.name })
+      const updatedTag = response.data.data || response.data
+      const index = list.value.findIndex(t => t.id === id)
+      if (index !== -1) {
+        list.value[index] = { ...list.value[index], ...updatedTag }
+      }
+      return updatedTag
+    } catch (error: any) {
+      console.error('Failed to update tag:', error)
+      if (error.response?.status === 409) {
+        throw new Error('Tag name already exists.')
+      }
+      if (error.response?.status === 404) {
+        throw new Error('Tag not found.')
+      }
+      if (error.response?.status === 405) {
+        throw new Error('Tag updates are not supported by the backend yet.')
+      }
+      throw new Error('Failed to update tag. The backend may not support this operation.')
     }
   }
 
@@ -47,9 +72,18 @@ export const useTagsStore = defineStore('tags', () => {
       if (index !== -1) {
         list.value.splice(index, 1)
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to remove tag:', error)
-      throw error
+      if (error.response?.status === 400 && error.response?.data?.message?.includes('tag in use')) {
+        throw new Error('Cannot delete tag that is attached to transactions.')
+      }
+      if (error.response?.status === 404) {
+        throw new Error('Tag not found.')
+      }
+      if (error.response?.status === 405) {
+        throw new Error('Tag deletion is not supported by the backend yet.')
+      }
+      throw new Error('Failed to delete tag. The backend may not support this operation.')
     }
   }
 
@@ -58,6 +92,7 @@ export const useTagsStore = defineStore('tags', () => {
     loading,
     fetch,
     add,
+    update,
     remove,
   }
 })

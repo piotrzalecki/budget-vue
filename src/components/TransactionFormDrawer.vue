@@ -1,11 +1,5 @@
 <template>
-  <v-navigation-drawer
-    v-model="isOpen"
-    location="right"
-    :width="$vuetify.display.mdAndUp ? 400 : '100%'"
-    temporary
-    :mobile-breakpoint="600"
-  >
+  <v-navigation-drawer v-model="isOpen" location="right" width="420" temporary>
     <v-card flat height="100%">
       <v-card-title class="d-flex align-center">
         <span>{{ editMode ? 'Edit' : 'Add' }} Transaction</span>

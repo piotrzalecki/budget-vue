@@ -1,34 +1,53 @@
-Ticket — “Transactions page integration”
+Ticket — “Tags CRUD Page”
 
-(Epic 4 – CRUD Endpoints)
+(Epic 7 – Tags & Settings)
 
-This ticket stitches together everything you’ve built so far (router, Pinia store, TransactionTable, and the form drawer) into a fully-functional TransactionsPage.vue. After it’s done, you’ll be able to open the page, filter a date range, add/edit/delete rows, and see the table update instantly.
+This task builds the small page where you create, rename, and delete tags that get attached to transactions and recurring rules.
+
+Goal	Give the user a quick, friction-free UI to manage the tag list.
+
+
 
 ⸻
 
-1  Responsibilities of the page
+1 Responsibilities of TagsPage.vue
 
-Area	What it must do	UI element
-Data fetch	Ask the transactions Pinia store for rows when the page loads and whenever filters change.	lifecycle hook / watch
-Filters	Date-range (2 pickers or a preset “This Month”), multi-tag select, text search on note.	Small toolbar above table
-Table	Render via <TransactionTable>; pass props items, loading, page, itemsPerPage, total; handle edit, delete, page-change emits.	Already implemented component
-Add / edit	Floating Action Button (FAB) ↗ opens TransactionFormDrawer; edit event from table opens the same drawer in edit mode.	<v-btn icon="mdi-plus">
-Soft-delete	Confirmation dialog → invoke transactions.softDelete(id) → toast on success.	<ConfirmDialog>
-Snackbar	Any success / error goes through useSnackbar().	Bottom overlay
-Pagination	For now client-side; table displays Vuetify paginator.	Provided by v-data-table
-Loading state	Show table’s built-in progress and/or a global linear bar while fetch in flight.	loading prop
+Feature	Details / UI Element
+List tags	Simple table (or list) showing name, usage count (optional)
+Create tag	Dialog or inline text field + Add button
+Rename tag	Pencil icon → inline edit OR dialog
+Delete tag	Trash icon → confirm dialog; handle “tag in use” error
+Loading state	Linear progress on first load / mutations
+Snackbar feedback	Success / error toasts via useSnackbar()
 
 
+⸻
 
-3  Acceptance criteria
+2 Component hierarchy
 
-Test	Expected
-Page loads → calls store.fetch and shows rows	✔
-Typing in search field triggers new fetch	✔
-Clicking “+” opens empty drawer and saving inserts row, table refreshes	✔
-Clicking pencil opens drawer pre-filled with row values	✔
-Clicking trash asks confirm and soft-deletes, row disappears	✔
-Pagination next/prev changes rows shown	✔
-mobile (<600 px) — drawer is full-screen, filters stack vertically	✔
+TagsPage.vue
+ ├─ TagTable.vue           (v-data-table or v-list)
+ ├─ TagFormDialog.vue      (Add / Rename)
+ └─ ConfirmDialog.vue      (Delete confirm)
 
-When all checks pass and the Transactions page feels cohesive, the “Transactions page integration” ticket is complete.
+
+
+5 Validation & UX
+
+Scenario	Behaviour
+Duplicate name	Store/API returns 409 → show red snackbar “Tag name already exists.”
+Name blank	Dialog shows “Required” rule, save disabled
+Tag attached to transactions	API responds 400 “tag in use” → snackbar error
+
+
+⸻
+
+6 Acceptance Criteria
+	1.	Page loads and shows all tags from backend.
+	2.	Adding a tag updates list without refresh; snackbar “Tag added”.
+	3.	Renaming reflects immediately; duplicate handled gracefully.
+	4.	Delete shows confirm; if tag unused, it disappears; if in use, error toast.
+	5.	All actions show/clear loading states; no console errors.
+	6.	Unit/E2E tests pass (add, edit, delete happy-path).
+
+When those behaviours work end-to-end, the “Tags CRUD page” ticket is complete.
