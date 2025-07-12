@@ -169,7 +169,7 @@
         tagIds.value = rule.tag_ids || []
       }
     } catch (error) {
-      console.error('Failed to load recurring rule:', error)
+      // Handle error silently
     } finally {
       loading.value = false
     }

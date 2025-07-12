@@ -19,6 +19,13 @@ describe('App.vue Components', () => {
       configurable: true,
       value: 1024,
     })
+
+    // Reset snackbar state between tests
+    const { show, msg, color, timeout } = useSnackbar()
+    show.value = false
+    msg.value = ''
+    color.value = 'info'
+    timeout.value = 3000
   })
 
   describe('Drawer Store', () => {
@@ -70,51 +77,51 @@ describe('App.vue Components', () => {
 
   describe('Snackbar Composable', () => {
     it('shows snackbar when push() is called', async () => {
-      const { push, snackbar } = useSnackbar()
+      const { push, show, msg, color } = useSnackbar()
 
       // Trigger snackbar
       push('Saved', 'success')
 
       // Check if snackbar state is updated
-      expect(snackbar.value.show).toBe(true)
-      expect(snackbar.value.text).toBe('Saved')
-      expect(snackbar.value.color).toBe('success')
+      expect(show.value).toBe(true)
+      expect(msg.value).toBe('Saved')
+      expect(color.value).toBe('success')
     })
 
     it('shows snackbar with custom timeout', async () => {
-      const { push, snackbar } = useSnackbar()
+      const { push, show, msg, color, timeout } = useSnackbar()
 
       // Trigger snackbar with custom timeout
       push('Error occurred', 'error', 5000)
 
-      expect(snackbar.value.show).toBe(true)
-      expect(snackbar.value.text).toBe('Error occurred')
-      expect(snackbar.value.color).toBe('error')
-      expect(snackbar.value.timeout).toBe(5000)
+      expect(show.value).toBe(true)
+      expect(msg.value).toBe('Error occurred')
+      expect(color.value).toBe('error')
+      expect(timeout.value).toBe(5000)
     })
 
     it('hides snackbar when hideSnackbar() is called', async () => {
-      const { push, hideSnackbar, snackbar } = useSnackbar()
+      const { push, onHide, show } = useSnackbar()
 
       // Show snackbar first
       push('Test message')
-      expect(snackbar.value.show).toBe(true)
+      expect(show.value).toBe(true)
 
       // Hide snackbar
-      hideSnackbar()
-      expect(snackbar.value.show).toBe(false)
+      onHide()
+      expect(show.value).toBe(false)
     })
 
     it('uses default values when push() is called with minimal parameters', async () => {
-      const { push, snackbar } = useSnackbar()
+      const { push, show, msg, color, timeout } = useSnackbar()
 
       // Trigger snackbar with only text
       push('Default message')
 
-      expect(snackbar.value.show).toBe(true)
-      expect(snackbar.value.text).toBe('Default message')
-      expect(snackbar.value.color).toBe('success')
-      expect(snackbar.value.timeout).toBe(3000)
+      expect(show.value).toBe(true)
+      expect(msg.value).toBe('Default message')
+      expect(color.value).toBe('info')
+      expect(timeout.value).toBe(3000)
     })
   })
 

@@ -41,7 +41,7 @@
   watch(
     () => props.modelValue,
     newValue => {
-      if (!isFocused.value && newValue > 0) {
+      if (!isFocused.value && newValue !== 0) {
         inputValue.value = (newValue / 100).toFixed(2)
       } else if (!isFocused.value && newValue === 0) {
         inputValue.value = ''
@@ -54,8 +54,8 @@
     const target = event.target as HTMLInputElement
     const rawValue = target.value
 
-    // Allow only numbers, decimal point, and backspace
-    const cleanValue = rawValue.replace(/[^0-9.]/g, '')
+    // Allow numbers, decimal point, minus sign, and backspace
+    const cleanValue = rawValue.replace(/[^0-9.-]/g, '')
 
     // Ensure only one decimal point
     const parts = cleanValue.split('.')
@@ -85,7 +85,7 @@
     isFocused.value = false
     // Format the value on blur
     const value = parseFloat(inputValue.value) || 0
-    if (value > 0) {
+    if (value !== 0) {
       inputValue.value = value.toFixed(2)
     } else {
       inputValue.value = ''

@@ -171,7 +171,7 @@
         }
       }
     } catch (error) {
-      console.error('Failed to load transaction:', error)
+      // Handle error silently
     } finally {
       loading.value = false
     }

@@ -29,7 +29,6 @@ export const useRecurringStore = defineStore('recurring', () => {
       // Handle API response structure: {data: Array, error: null}
       list.value = response.data.data || response.data || []
     } catch (error) {
-      console.error('Failed to fetch recurring transactions:', error)
       list.value = []
     } finally {
       loading.value = false
@@ -42,7 +41,6 @@ export const useRecurringStore = defineStore('recurring', () => {
       const response = await api.get('/recurring/active')
       list.value = response.data.data || response.data || []
     } catch (error) {
-      console.error('Failed to fetch active recurring transactions:', error)
       list.value = []
     } finally {
       loading.value = false
@@ -56,7 +54,6 @@ export const useRecurringStore = defineStore('recurring', () => {
       const response = await api.get('/recurring/due', { params })
       list.value = response.data.data || response.data || []
     } catch (error) {
-      console.error('Failed to fetch due recurring transactions:', error)
       list.value = []
     } finally {
       loading.value = false
@@ -80,7 +77,6 @@ export const useRecurringStore = defineStore('recurring', () => {
 
       return response.data
     } catch (error) {
-      console.error('Failed to add recurring transaction:', error)
       throw error
     }
   }
@@ -105,7 +101,6 @@ export const useRecurringStore = defineStore('recurring', () => {
 
       return response.data
     } catch (error) {
-      console.error('Failed to update recurring transaction:', error)
       throw error
     }
   }
@@ -116,7 +111,6 @@ export const useRecurringStore = defineStore('recurring', () => {
       // Refresh the entire list to get complete data from server
       await fetch()
     } catch (error) {
-      console.error('Failed to delete recurring transaction:', error)
       throw error
     }
   }
@@ -128,7 +122,6 @@ export const useRecurringStore = defineStore('recurring', () => {
       await fetch()
       return response.data
     } catch (error) {
-      console.error('Failed to toggle active status:', error)
       throw error
     }
   }
@@ -137,7 +130,6 @@ export const useRecurringStore = defineStore('recurring', () => {
     try {
       await setActive(id)
     } catch (error) {
-      console.error('Failed to toggle recurring transaction:', error)
       throw error
     }
   }

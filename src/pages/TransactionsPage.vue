@@ -91,7 +91,6 @@
       await transactionsStore.softDelete(id)
       snack.push('Transaction deleted successfully', 'success')
     } catch (error) {
-      console.error('Delete error:', error)
       snack.push('Failed to delete transaction', 'error')
     }
   }
@@ -116,7 +115,6 @@
       // Close drawer after the store operations complete
       closeDrawer()
     } catch (error) {
-      console.error('Save error:', error)
       snack.push('Failed to save transaction', 'error')
     } finally {
       saving.value = false

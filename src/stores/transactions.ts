@@ -76,7 +76,6 @@ export const useTransactionsStore = defineStore('transactions', () => {
       const rawTransactions = response.data.data || response.data || []
       list.value = rawTransactions.map(processTransaction)
     } catch (error) {
-      console.error('Failed to fetch transactions:', error)
       list.value = []
     } finally {
       loading.value = false
@@ -115,7 +114,6 @@ export const useTransactionsStore = defineStore('transactions', () => {
 
       list.value = filteredTransactions
     } catch (error) {
-      console.error('Failed to fetch transactions:', error)
       list.value = []
     } finally {
       loading.value = false
@@ -148,7 +146,6 @@ export const useTransactionsStore = defineStore('transactions', () => {
 
       return response.data
     } catch (error) {
-      console.error('Failed to add transaction:', error)
       throw error
     }
   }
@@ -159,7 +156,6 @@ export const useTransactionsStore = defineStore('transactions', () => {
       // Refresh the list to get updated data from server
       await fetchWithFilters()
     } catch (error) {
-      console.error('Failed to delete transaction:', error)
       throw error
     }
   }
@@ -188,7 +184,6 @@ export const useTransactionsStore = defineStore('transactions', () => {
 
       return response.data
     } catch (error) {
-      console.error('Failed to update transaction:', error)
       throw error
     }
   }

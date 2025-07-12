@@ -21,7 +21,6 @@ export const useTagsStore = defineStore('tags', () => {
       // Handle different response structures
       list.value = response.data.data || response.data || []
     } catch (error) {
-      console.error('Failed to fetch tags:', error)
       list.value = []
     } finally {
       loading.value = false
@@ -33,7 +32,6 @@ export const useTagsStore = defineStore('tags', () => {
       await api.post('/tags', { name: tag.name })
       await fetch() // Refresh the list from the backend
     } catch (error: any) {
-      console.error('Failed to add tag:', error)
       if (error.response?.status === 409) {
         throw new Error('Tag name already exists.')
       }
@@ -51,7 +49,6 @@ export const useTagsStore = defineStore('tags', () => {
       }
       return updatedTag
     } catch (error: any) {
-      console.error('Failed to update tag:', error)
       if (error.response?.status === 409) {
         throw new Error('Tag name already exists.')
       }
@@ -73,7 +70,6 @@ export const useTagsStore = defineStore('tags', () => {
         list.value.splice(index, 1)
       }
     } catch (error: any) {
-      console.error('Failed to remove tag:', error)
       if (error.response?.status === 400 && error.response?.data?.message?.includes('tag in use')) {
         throw new Error('Cannot delete tag that is attached to transactions.')
       }

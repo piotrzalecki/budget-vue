@@ -116,10 +116,7 @@
 
   // Pie chart option for spend by tag
   const pieOption = computed(() => {
-    console.log('DashboardCharts: Computing pie option with data:', currentMonth.value?.by_tag)
-
     if (!currentMonth.value?.by_tag) {
-      console.log('DashboardCharts: No by_tag data, returning empty pie')
       return {
         tooltip: { trigger: 'item' },
         series: [
@@ -145,8 +142,6 @@
         value: parseFloat(data.total_out || '0') * 100, // Convert to pence
       }))
 
-    console.log('DashboardCharts: Pie chart data:', data)
-
     return {
       tooltip: {
         trigger: 'item',
@@ -167,10 +162,7 @@
 
   // Bar chart option for net cash flow
   const barOption = computed(() => {
-    console.log('DashboardCharts: Computing bar option with data:', lastSixMonths.value)
-
     if (!lastSixMonths.value.length) {
-      console.log('DashboardCharts: No six months data, returning empty bar')
       return {
         tooltip: { trigger: 'axis' },
         xAxis: { type: 'category', data: [] },
@@ -189,8 +181,6 @@
     // Convert string amounts to pence
     const incomeData = lastSixMonths.value.map(report => parseFloat(report.total_in || '0') * 100)
     const expenseData = lastSixMonths.value.map(report => parseFloat(report.total_out || '0') * 100)
-
-    console.log('DashboardCharts: Bar chart data:', { months, incomeData, expenseData })
 
     return {
       tooltip: {
@@ -244,11 +234,9 @@
 
       // Fetch current month for pie chart and stat tiles
       const currentMonthResponse = await reportsStore.fetchMonth(currentYM)
-      console.log('Dashboard API: current month raw response:', currentMonthResponse)
 
       // Extract the actual data from the response
       currentMonth.value = currentMonthResponse.data || currentMonthResponse
-      console.log('Dashboard API: current month extracted data:', currentMonth.value)
 
       // Fetch last 6 months totals for bar chart
       const months = []
@@ -260,13 +248,11 @@
 
       const promises = months.map(ym => reportsStore.fetchMonthTotals(ym))
       const results = await Promise.all(promises)
-      console.log('Dashboard API: last 6 months totals raw responses:', results)
 
       // Extract data from each response
       lastSixMonths.value = results.map(response => response.data || response)
-      console.log('Dashboard API: last 6 months totals extracted data:', lastSixMonths.value)
     } catch (error) {
-      console.error('Failed to fetch dashboard data:', error)
+      // Handle error silently or implement proper error handling
     }
   }
 

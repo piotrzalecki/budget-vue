@@ -13,19 +13,19 @@
 </template>
 
 <script setup lang="ts">
-import { useThemeStore } from '@/stores/theme'
+  import { useThemeStore } from '@/stores/theme'
 
-interface Props {
-  icon?: boolean
-  variant?: 'text' | 'flat' | 'elevated' | 'tonal' | 'outlined' | 'plain'
-  size?: 'x-small' | 'small' | 'default' | 'large' | 'x-large'
-}
+  interface Props {
+    icon?: boolean
+    variant?: 'text' | 'flat' | 'elevated' | 'tonal' | 'outlined' | 'plain'
+    size?: 'x-small' | 'small' | 'default' | 'large' | 'x-large'
+  }
 
-withDefaults(defineProps<Props>(), {
-  icon: true,
-  variant: 'text',
-  size: 'small',
-})
+  withDefaults(defineProps<Props>(), {
+    icon: true,
+    variant: 'text',
+    size: 'small',
+  })
 
-const themeStore = useThemeStore()
+  const themeStore = useThemeStore()
 </script>
