@@ -1,53 +1,125 @@
-Ticket — “Tags CRUD Page”
+Ticket — “useSnackbar composable”
 
-(Epic 7 – Tags & Settings)
+(Epic 8 – State & Composables, shared utility)
 
-This task builds the small page where you create, rename, and delete tags that get attached to transactions and recurring rules.
+useSnackbar() centralises all toast / alert messaging so every component shows notifications in the same way, through the single <v-snackbar> already mounted in App.vue.
 
-Goal	Give the user a quick, friction-free UI to manage the tag list.
-
-
-
-⸻
-
-1 Responsibilities of TagsPage.vue
-
-Feature	Details / UI Element
-List tags	Simple table (or list) showing name, usage count (optional)
-Create tag	Dialog or inline text field + Add button
-Rename tag	Pencil icon → inline edit OR dialog
-Delete tag	Trash icon → confirm dialog; handle “tag in use” error
-Loading state	Linear progress on first load / mutations
-Snackbar feedback	Success / error toasts via useSnackbar()
+Why we need it	Outcome
+Consistent UX	All success/error/info messages appear in one place, with uniform colours and timeout.
+Decoupled code	Components don’t import Vuetify objects directly—just call a tiny helper.
+Queueing	Composable can queue messages so multiple toasts don’t overlap.
+Testable	In unit tests you can spy on snackbar.push() instead of inspecting DOM.
 
 
 ⸻
 
-2 Component hierarchy
+1 Implementation
 
-TagsPage.vue
- ├─ TagTable.vue           (v-data-table or v-list)
- ├─ TagFormDialog.vue      (Add / Rename)
- └─ ConfirmDialog.vue      (Delete confirm)
+// src/composables/useSnackbar.ts
+import { reactive } from 'vue'
 
+type Level = 'success' | 'error' | 'info' | 'warning'
 
+interface SnackState {
+  show:  boolean
+  msg:   string
+  color: Level
+  queue: { msg: string; color: Level }[]
+  timeout: number
+}
 
-5 Validation & UX
+const state: SnackState = reactive({
+  show: false,
+  msg:  '',
+  color: 'info',
+  queue: [],
+  timeout: 3000
+})
 
-Scenario	Behaviour
-Duplicate name	Store/API returns 409 → show red snackbar “Tag name already exists.”
-Name blank	Dialog shows “Required” rule, save disabled
-Tag attached to transactions	API responds 400 “tag in use” → snackbar error
+function next() {
+  if (state.queue.length && !state.show) {
+    const { msg, color } = state.queue.shift()!
+    state.msg   = msg
+    state.color = color
+    state.show  = true
+  }
+}
+
+export function useSnackbar() {
+  /** Push a new toast */
+  function push(msg: string, color: Level = 'info', timeout = 3000) {
+    state.queue.push({ msg, color })
+    state.timeout = timeout
+    next()
+  }
+
+  /** Call in <v-snackbar @update:show> to pop current and show next */
+  function onHide() {
+    state.show = false
+    next()
+  }
+
+  return { ...toRefs(state), push, onHide }
+}
 
 
 ⸻
 
-6 Acceptance Criteria
-	1.	Page loads and shows all tags from backend.
-	2.	Adding a tag updates list without refresh; snackbar “Tag added”.
-	3.	Renaming reflects immediately; duplicate handled gracefully.
-	4.	Delete shows confirm; if tag unused, it disappears; if in use, error toast.
-	5.	All actions show/clear loading states; no console errors.
-	6.	Unit/E2E tests pass (add, edit, delete happy-path).
+2 App-level mounting
 
-When those behaviours work end-to-end, the “Tags CRUD page” ticket is complete.
+<!-- App.vue -->
+<v-snackbar
+  v-model="snack.show"
+  :timeout="snack.timeout"
+  :color="snack.color"
+  @update:show="snack.onHide"
+>
+  {{ snack.msg }}
+</v-snackbar>
+
+// App.vue <script setup>
+import { useSnackbar } from '@/composables/useSnackbar'
+const snack = useSnackbar()
+
+
+⸻
+
+3 Using it in components / stores
+
+import { useSnackbar } from '@/composables/useSnackbar'
+const snack = useSnackbar()
+
+async function save() {
+  try {
+    await api.post('/transactions', data)
+    snack.push('Transaction added', 'success')
+  } catch (e) {
+    snack.push('Failed to save', 'error', 5000)
+  }
+}
+
+
+⸻
+
+4 Unit test outline (Vitest)
+
+it('queues and shows messages', () => {
+  const s = useSnackbar()
+  s.push('hello', 'info')
+  expect(s.show.value).toBe(true)
+  expect(s.msg.value).toBe('hello')
+  s.onHide()          // simulate snackbar close
+  expect(s.show.value).toBe(false)
+})
+
+
+⸻
+
+5 Acceptance criteria
+	•	Any call to snack.push() instantly shows a toast; multiple rapid calls queue.
+	•	Snackbar colours map to theme (success green, error red, etc.).
+	•	Closing one toast auto-displays the next.
+	•	No component directly creates <v-snackbar>—all go through the composable.
+	•	Unit tests for basic queue/colour logic pass in CI.
+
+When these behaviours are implemented and adopted across pages, the “useSnackbar composable” ticket is complete.

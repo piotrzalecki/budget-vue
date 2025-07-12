@@ -10,7 +10,7 @@
   const router = useRouter()
   const route = useRoute()
   const sessionStore = useSessionStore()
-  const { snackbar } = useSnackbar()
+  const snack = useSnackbar()
   const themeStore = useThemeStore()
   const drawerStore = useDrawerStore()
 
@@ -133,14 +133,14 @@
 
     <!-- Global Snackbar -->
     <v-snackbar
-      v-model="snackbar.show"
-      :color="snackbar.color"
-      :timeout="snackbar.timeout"
-      location="bottom"
+      v-model="snack.show.value"
+      :timeout="snack.timeout.value"
+      :color="snack.color.value"
+      @update:show="snack.onHide"
     >
-      {{ snackbar.text }}
+      {{ snack.msg.value }}
       <template v-slot:actions>
-        <v-btn color="white" variant="text" @click="snackbar.show = false"> Close </v-btn>
+        <v-btn color="white" variant="text" @click="snack.show.value = false"> Close </v-btn>
       </template>
     </v-snackbar>
   </v-app>

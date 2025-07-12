@@ -1,42 +1,43 @@
+import { useSnackbar } from '@/composables/useSnackbar'
+import router from '@/router'
 import { useSessionStore } from '@/stores/session'
+import type { AxiosInstance } from 'axios'
 import axios from 'axios'
-import { useRouter } from 'vue-router'
 
-export const useApi = () => {
-  const sessionStore = useSessionStore()
-  const router = useRouter()
+let cached: AxiosInstance | null = null
+
+export function useApi(): AxiosInstance {
+  if (cached) return cached
+
+  const session = useSessionStore()
+  const snackbar = useSnackbar()
 
   const api = axios.create({
-    baseURL: import.meta.env.VITE_API_BASE_URL || '/api/v1',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    baseURL: '/api/v1',
+    timeout: 10_000,
   })
 
-  // Request interceptor to inject API key
-  api.interceptors.request.use(
-    config => {
-      if (sessionStore.apiKey) {
-        config.headers['X-API-Key'] = sessionStore.apiKey
-      }
-      return config
-    },
-    error => {
-      return Promise.reject(error)
-    }
-  )
+  // request: inject key
+  api.interceptors.request.use(cfg => {
+    cfg.headers['X-API-Key'] = session.apiKey
+    return cfg
+  })
 
-  // Response interceptor to handle 401 errors
+  // response: handle errors
   api.interceptors.response.use(
-    response => response,
-    error => {
-      if (error.response?.status === 401) {
-        sessionStore.clearKey()
+    res => res,
+    err => {
+      if (err.response?.status === 401) {
+        session.clearKey()
+        snackbar.push('Session expired', 'error')
         router.push('/login')
+      } else {
+        snackbar.push(err.message, 'error')
       }
-      return Promise.reject(error)
+      return Promise.reject(err)
     }
   )
 
+  cached = api
   return api
 }

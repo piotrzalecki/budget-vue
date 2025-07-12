@@ -1,40 +1,45 @@
-import { ref } from 'vue'
+import { reactive, toRefs } from 'vue'
 
-interface SnackbarOptions {
-  text: string
-  color?: string
-  timeout?: number
+type Level = 'success' | 'error' | 'info' | 'warning'
+
+interface SnackState {
+  show: boolean
+  msg: string
+  color: Level
+  queue: { msg: string; color: Level }[]
+  timeout: number
 }
 
-const snackbar = ref({
+const state: SnackState = reactive({
   show: false,
-  text: '',
-  color: 'success',
+  msg: '',
+  color: 'info',
+  queue: [],
   timeout: 3000,
 })
 
-export const useSnackbar = () => {
-  const showSnackbar = (options: SnackbarOptions) => {
-    snackbar.value = {
-      show: true,
-      text: options.text,
-      color: options.color || 'success',
-      timeout: options.timeout || 3000,
-    }
+function next() {
+  if (state.queue.length && !state.show) {
+    const { msg, color } = state.queue.shift()!
+    state.msg = msg
+    state.color = color
+    state.show = true
+  }
+}
+
+export function useSnackbar() {
+  /** Push a new toast */
+  function push(msg: string, color: Level = 'info', timeout = 3000) {
+    state.queue.push({ msg, color })
+    state.timeout = timeout
+    next()
   }
 
-  const push = (text: string, color: string = 'success', timeout: number = 3000) => {
-    showSnackbar({ text, color, timeout })
+  /** Call in <v-snackbar @update:show> to pop current and show next */
+  function onHide() {
+    state.show = false
+    next()
   }
 
-  const hideSnackbar = () => {
-    snackbar.value.show = false
-  }
-
-  return {
-    snackbar,
-    showSnackbar,
-    push,
-    hideSnackbar,
-  }
+  return { ...toRefs(state), push, onHide }
 }

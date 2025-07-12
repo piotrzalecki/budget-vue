@@ -28,14 +28,6 @@
 
     <!-- Add Tag Dialog -->
     <TagFormDialog v-model="showDialog" @save="handleSave" />
-
-    <!-- Global Snackbar -->
-    <v-snackbar v-model="snackbar.show" :color="snackbar.color" :timeout="snackbar.timeout">
-      {{ snackbar.text }}
-      <template #actions>
-        <v-btn variant="text" @click="snackbar.show = false">Close</v-btn>
-      </template>
-    </v-snackbar>
   </v-container>
 </template>
 
@@ -47,24 +39,16 @@
   import { useTagsStore } from '../stores/tags'
 
   const tagsStore = useTagsStore()
-  const { push } = useSnackbar()
+  const snack = useSnackbar()
 
   // Dialog state
   const showDialog = ref(false)
-
-  // Snackbar state
-  const snackbar = ref({
-    show: false,
-    text: '',
-    color: 'success',
-    timeout: 3000,
-  })
 
   onMounted(async () => {
     try {
       await tagsStore.fetch()
     } catch (error) {
-      showError('Failed to load tags')
+      snack.push('Failed to load tags', 'error', 5000)
     }
   })
 
@@ -75,27 +59,9 @@
   async function handleSave(name: string) {
     try {
       await tagsStore.add({ name })
-      showSuccess('Tag added successfully')
+      snack.push('Tag added successfully', 'success')
     } catch (error: any) {
-      showError(error.message || 'Failed to save tag')
-    }
-  }
-
-  function showSuccess(message: string) {
-    snackbar.value = {
-      show: true,
-      text: message,
-      color: 'success',
-      timeout: 3000,
-    }
-  }
-
-  function showError(message: string) {
-    snackbar.value = {
-      show: true,
-      text: message,
-      color: 'error',
-      timeout: 5000,
+      snack.push(error.message || 'Failed to save tag', 'error', 5000)
     }
   }
 </script>

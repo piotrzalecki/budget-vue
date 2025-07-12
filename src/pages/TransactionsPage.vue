@@ -60,7 +60,7 @@
   import { useTransactionsStore } from '../stores/transactions'
 
   const transactionsStore = useTransactionsStore()
-  const { showSnackbar } = useSnackbar()
+  const snack = useSnackbar()
   const page = ref(1)
   const itemsPerPage = ref(50)
   const drawerOpen = ref(false)
@@ -89,10 +89,10 @@
     try {
       // Soft delete
       await transactionsStore.softDelete(id)
-      showSnackbar({ text: 'Transaction deleted successfully' })
+      snack.push('Transaction deleted successfully', 'success')
     } catch (error) {
       console.error('Delete error:', error)
-      showSnackbar({ text: 'Failed to delete transaction', color: 'error' })
+      snack.push('Failed to delete transaction', 'error')
     }
   }
 
@@ -107,17 +107,17 @@
       if (editingId.value !== null) {
         // Update existing transaction
         await transactionsStore.update(editingId.value, payload)
-        showSnackbar({ text: 'Transaction updated successfully' })
+        snack.push('Transaction updated successfully', 'success')
       } else {
         // Add new transaction
         await transactionsStore.add(payload)
-        showSnackbar({ text: 'Transaction added successfully' })
+        snack.push('Transaction added successfully', 'success')
       }
       // Close drawer after the store operations complete
       closeDrawer()
     } catch (error) {
       console.error('Save error:', error)
-      showSnackbar({ text: 'Failed to save transaction', color: 'error' })
+      snack.push('Failed to save transaction', 'error')
     } finally {
       saving.value = false
     }

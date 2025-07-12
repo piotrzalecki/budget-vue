@@ -30,7 +30,7 @@
 
   const router = useRouter()
   const sessionStore = useSessionStore()
-  const { showSnackbar } = useSnackbar()
+  const snack = useSnackbar()
 
   const key = ref('')
 
@@ -38,7 +38,7 @@
     if (key.value.trim()) {
       sessionStore.setKey(key.value.trim())
       router.push('/dashboard')
-      showSnackbar({ text: 'API key saved successfully' })
+      snack.push('API key saved successfully', 'success')
     }
   }
 </script>

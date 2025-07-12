@@ -83,7 +83,7 @@
 
   const recurringStore = useRecurringStore()
   const api = useApi()
-  const { push: showSnackbar } = useSnackbar()
+  const { push } = useSnackbar()
 
   const drawerOpen = ref(false)
   const editId = ref<number | null>(null)
@@ -137,18 +137,18 @@
   async function handleToggle(id: number, newState: boolean) {
     try {
       await recurringStore.toggle(id)
-      showSnackbar(`Recurring transaction ${newState ? 'activated' : 'deactivated'}`, 'success')
+      push(`Recurring transaction ${newState ? 'activated' : 'deactivated'}`, 'success')
     } catch (error) {
-      showSnackbar('Failed to update status', 'error')
+      push('Failed to update status', 'error')
     }
   }
 
   async function handleDelete(id: number) {
     try {
       await recurringStore.remove(id)
-      showSnackbar('Recurring transaction deleted successfully', 'success')
+      push('Recurring transaction deleted successfully', 'success')
     } catch (error) {
-      showSnackbar('Failed to delete recurring transaction', 'error')
+      push('Failed to delete recurring transaction', 'error')
     }
   }
 
@@ -165,14 +165,14 @@
     try {
       if (editId.value) {
         await recurringStore.update(editId.value, payload)
-        showSnackbar('Recurring transaction updated successfully', 'success')
+        push('Recurring transaction updated successfully', 'success')
       } else {
         await recurringStore.add(payload)
-        showSnackbar('Recurring transaction created successfully', 'success')
+        push('Recurring transaction created successfully', 'success')
       }
       handleClose()
     } catch (error) {
-      showSnackbar('Failed to save recurring transaction', 'error')
+      push('Failed to save recurring transaction', 'error')
     } finally {
       saving.value = false
     }
