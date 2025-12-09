@@ -25,10 +25,14 @@ export const useRecurringStore = defineStore('recurring', () => {
   const fetch = async () => {
     loading.value = true
     try {
+      console.log('Fetching recurring...')
       const response = await api.get('/recurring')
+      console.log('Recurring API response:', response)
       // Handle API response structure: {data: Array, error: null}
       list.value = response.data.data || response.data || []
+      console.log('Recurring list set to:', list.value)
     } catch (error) {
+      console.error('Error fetching recurring:', error)
       list.value = []
     } finally {
       loading.value = false

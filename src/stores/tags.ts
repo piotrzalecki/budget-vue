@@ -17,10 +17,14 @@ export const useTagsStore = defineStore('tags', () => {
   const fetch = async () => {
     loading.value = true
     try {
+      console.log('Fetching tags...')
       const response = await api.get('/tags')
+      console.log('Tags API response:', response)
       // Handle different response structures
       list.value = response.data.data || response.data || []
+      console.log('Tags list set to:', list.value)
     } catch (error) {
+      console.error('Error fetching tags:', error)
       list.value = []
     } finally {
       loading.value = false

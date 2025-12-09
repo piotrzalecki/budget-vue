@@ -54,6 +54,7 @@
   // Convert tag IDs to Tag objects for v-combobox
   const selectedTags = computed({
     get: () => {
+      if (!Array.isArray(props.modelValue)) return []
       return props.modelValue
         .map(id => tagsStore.list.find(tag => tag.id === id))
         .filter(Boolean) as Tag[]
@@ -65,6 +66,7 @@
   })
 
   const onUpdate = (tags: Tag[]) => {
+    if (!Array.isArray(tags)) return
     const tagIds = tags.map(tag => tag.id)
     emit('update:modelValue', tagIds)
   }

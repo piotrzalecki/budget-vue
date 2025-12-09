@@ -13,12 +13,18 @@ export function useApi(): AxiosInstance {
   const snackbar = useSnackbar()
 
   const api = axios.create({
-    baseURL: '/api/v1',
+    baseURL: import.meta.env.VITE_API_BASE || '/api/v1',
     timeout: 10_000,
   })
 
   // request: inject key
   api.interceptors.request.use(cfg => {
+    console.log(
+      'Making API request to:',
+      cfg.url,
+      'with API key:',
+      session.apiKey ? 'SET' : 'NOT SET'
+    )
     cfg.headers['X-API-Key'] = session.apiKey
     return cfg
   })

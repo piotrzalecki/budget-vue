@@ -31,32 +31,61 @@ export const useTransactionsStore = defineStore('transactions', () => {
 
   // Helper function to convert API response to our format
   const processTransaction = (transaction: any): Transaction => {
-    // If amount is a string (like "15.50"), convert to pence
-    let amount_pence = transaction.amount_pence
-    if (typeof transaction.amount === 'string' && !amount_pence) {
-      amount_pence = Math.round(parseFloat(transaction.amount) * 100)
-    }
+    try {
+      // Handle null/undefined transaction
+      if (!transaction || typeof transaction !== 'object') {
+        return {
+          id: 0,
+          amount_pence: 0,
+          amount: '',
+          note: '',
+          t_date: '',
+          tags: [],
+          created_at: '',
+          updated_at: '',
+        }
+      }
 
-    // Handle tags - API might return tag_ids or tags
-    let tags: Tag[] = []
-    if (Array.isArray(transaction.tags)) {
-      tags = transaction.tags
-    } else if (Array.isArray(transaction.tag_ids)) {
-      // If we have tag_ids, resolve them to actual tag objects from the tags store
-      tags = transaction.tag_ids
-        .map((id: number) => tagsStore.list.find(tag => tag.id === id))
-        .filter(Boolean) as Tag[]
-    }
+      // If amount is a string (like "15.50"), convert to pence
+      let amount_pence = transaction.amount_pence || 0
+      if (typeof transaction.amount === 'string' && !amount_pence) {
+        amount_pence = Math.round(parseFloat(transaction.amount) * 100) || 0
+      }
 
-    return {
-      id: transaction.id,
-      amount_pence: amount_pence || 0,
-      amount: transaction.amount,
-      note: transaction.note || '',
-      t_date: transaction.t_date,
-      tags: tags,
-      created_at: transaction.created_at,
-      updated_at: transaction.updated_at,
+      // Handle tags - API might return tag_ids or tags
+      let tags: Tag[] = []
+      if (Array.isArray(transaction.tags)) {
+        tags = transaction.tags
+      } else if (Array.isArray(transaction.tag_ids)) {
+        // If we have tag_ids, resolve them to actual tag objects from the tags store
+        tags = transaction.tag_ids
+          .map((id: number) => tagsStore.list?.find(tag => tag.id === id))
+          .filter(Boolean) as Tag[]
+      }
+
+      return {
+        id: transaction.id || 0,
+        amount_pence: amount_pence || 0,
+        amount: transaction.amount || '',
+        note: transaction.note || '',
+        t_date: transaction.t_date || '',
+        tags: tags,
+        created_at: transaction.created_at || '',
+        updated_at: transaction.updated_at || '',
+      }
+    } catch (error) {
+      console.error('Error processing transaction:', error, transaction)
+      // Return a safe default transaction
+      return {
+        id: 0,
+        amount_pence: 0,
+        amount: '',
+        note: '',
+        t_date: '',
+        tags: [],
+        created_at: '',
+        updated_at: '',
+      }
     }
   }
 
@@ -73,9 +102,12 @@ export const useTransactionsStore = defineStore('transactions', () => {
       if (endDate) params.append('to', endDate)
 
       const response = await api.get(`/transactions?${params.toString()}`)
-      const rawTransactions = response.data.data || response.data || []
-      list.value = rawTransactions.map(processTransaction)
+      console.log('Transactions API response:', response)
+      const rawTransactions = response?.data?.data || response?.data || []
+      console.log('Raw transactions data:', rawTransactions)
+      list.value = Array.isArray(rawTransactions) ? rawTransactions.map(processTransaction) : []
     } catch (error) {
+      console.error('Error fetching transactions:', error)
       list.value = []
     } finally {
       loading.value = false
@@ -95,8 +127,12 @@ export const useTransactionsStore = defineStore('transactions', () => {
       if (filters.value.to) params.append('to', filters.value.to)
 
       const response = await api.get(`/transactions?${params.toString()}`)
-      const rawTransactions = response.data.data || response.data || []
-      let filteredTransactions = rawTransactions.map(processTransaction)
+      console.log('Transactions API response (with filters):', response)
+      const rawTransactions = response?.data?.data || response?.data || []
+      console.log('Raw transactions data (with filters):', rawTransactions)
+      let filteredTransactions = Array.isArray(rawTransactions)
+        ? rawTransactions.map(processTransaction)
+        : []
 
       // Apply client-side filters
       if (filters.value.tagIds.length > 0) {
@@ -114,6 +150,7 @@ export const useTransactionsStore = defineStore('transactions', () => {
 
       list.value = filteredTransactions
     } catch (error) {
+      console.error('Error fetching transactions with filters:', error)
       list.value = []
     } finally {
       loading.value = false
@@ -198,5 +235,6 @@ export const useTransactionsStore = defineStore('transactions', () => {
     add,
     softDelete,
     update,
+    processTransaction,
   }
 })

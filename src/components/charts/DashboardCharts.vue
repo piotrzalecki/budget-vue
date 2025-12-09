@@ -134,12 +134,12 @@
     const data = Object.entries(currentMonth.value.by_tag)
       .filter(([tag, data]) => {
         // Check if total_out exists and is greater than 0
-        const totalOut = parseFloat(data.total_out || '0')
+        const totalOut = parseFloat((data as any)?.total_out || '0')
         return totalOut > 0
       })
       .map(([tag, data]) => ({
         name: tag,
-        value: parseFloat(data.total_out || '0') * 100, // Convert to pence
+        value: parseFloat((data as any)?.total_out || '0') * 100, // Convert to pence
       }))
 
     return {
@@ -162,7 +162,11 @@
 
   // Bar chart option for net cash flow
   const barOption = computed(() => {
-    if (!lastSixMonths.value.length) {
+    if (
+      !lastSixMonths.value ||
+      !Array.isArray(lastSixMonths.value) ||
+      !lastSixMonths.value.length
+    ) {
       return {
         tooltip: { trigger: 'axis' },
         xAxis: { type: 'category', data: [] },
@@ -179,8 +183,14 @@
     })
 
     // Convert string amounts to pence
-    const incomeData = lastSixMonths.value.map(report => parseFloat(report.total_in || '0') * 100)
-    const expenseData = lastSixMonths.value.map(report => parseFloat(report.total_out || '0') * 100)
+    const incomeData = lastSixMonths.value.map(report => {
+      const value = parseFloat(report?.total_in || '0')
+      return isNaN(value) ? 0 : value * 100
+    })
+    const expenseData = lastSixMonths.value.map(report => {
+      const value = parseFloat(report?.total_out || '0')
+      return isNaN(value) ? 0 : value * 100
+    })
 
     return {
       tooltip: {
@@ -250,7 +260,7 @@
       const results = await Promise.all(promises)
 
       // Extract data from each response
-      lastSixMonths.value = results.map(response => response.data || response)
+      lastSixMonths.value = results.map(response => response?.data || response).filter(Boolean)
     } catch (error) {
       // Handle error silently or implement proper error handling
     }
