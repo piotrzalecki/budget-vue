@@ -1,0 +1,20 @@
+version: "3.8"
+
+services:
+  budget-vue:
+    build: .
+    ports:
+      - "8080:80"
+    environment:
+      - VITE_API_BASE=https://budget-api.zalecki.uk/api/v1
+    volumes:
+      - ./debug-api.js:/debug-api.js:ro
+    command: >
+      sh -c "
+        echo 'Starting debug container...' &&
+        echo 'API Base: https://budget-api.zalecki.uk/api/v1' &&
+        echo 'Testing API connectivity...' &&
+        node /debug-api.js &&
+        echo 'Starting nginx...' &&
+        /start.sh
+      "
