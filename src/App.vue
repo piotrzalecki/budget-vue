@@ -19,7 +19,7 @@
 
   // Computed properties for responsive behavior
   const isMobile = computed(() => windowWidth.value < 600)
-  const isLoggedIn = computed(() => !!sessionStore.apiKey)
+  const isLoggedIn = computed(() => !!sessionStore.token)
   const drawerModel = computed({
     get: () => drawerStore.isOpen,
     set: (value: boolean) => drawerStore.setOpen(value),
@@ -38,7 +38,7 @@
   }
 
   const logout = () => {
-    sessionStore.clearKey()
+    sessionStore.clearSession()
     router.push('/login')
   }
 

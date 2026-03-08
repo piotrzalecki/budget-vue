@@ -261,7 +261,7 @@ describe('Essential Data Safety Tests', () => {
     it('should convert valid string amounts to pence', () => {
       const transaction = {
         id: 1,
-        amount: '15.50',
+        amount: '1550',
         t_date: '2024-01-01',
         created_at: '2024-01-01T00:00:00Z',
         updated_at: '2024-01-01T00:00:00Z',

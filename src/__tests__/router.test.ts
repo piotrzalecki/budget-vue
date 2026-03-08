@@ -106,12 +106,12 @@ describe('Router Configuration', () => {
       router = createTestRouter()
       router.beforeEach((to: any, from: any, next: any) => {
         const sessionStore = useSessionStore()
-        if (!sessionStore.apiKey) sessionStore.loadFromStorage()
-        if (to.path !== '/login' && !sessionStore.apiKey) next('/login')
+        if (!sessionStore.token) sessionStore.loadFromStorage()
+        if (to.path !== '/login' && !sessionStore.token) next('/login')
         else next()
       })
       const sessionStore = useSessionStore()
-      sessionStore.setKey('test-api-key')
+      sessionStore.setSession('test-api-key', 'test@example.com', 1)
       await router.push('/')
       expect(router.currentRoute.value.path).toBe('/dashboard')
     })
@@ -120,8 +120,8 @@ describe('Router Configuration', () => {
       router = createTestRouter()
       router.beforeEach((to: any, from: any, next: any) => {
         const sessionStore = useSessionStore()
-        if (!sessionStore.apiKey) sessionStore.loadFromStorage()
-        if (to.path !== '/login' && !sessionStore.apiKey) next('/login')
+        if (!sessionStore.token) sessionStore.loadFromStorage()
+        if (to.path !== '/login' && !sessionStore.token) next('/login')
         else next()
       })
       const routes = router.getRoutes()
@@ -146,8 +146,8 @@ describe('Router Configuration', () => {
       router = createTestRouter()
       router.beforeEach((to: any, from: any, next: any) => {
         const sessionStore = useSessionStore()
-        if (!sessionStore.apiKey) sessionStore.loadFromStorage()
-        if (to.path !== '/login' && !sessionStore.apiKey) next('/login')
+        if (!sessionStore.token) sessionStore.loadFromStorage()
+        if (to.path !== '/login' && !sessionStore.token) next('/login')
         else next()
       })
       const routes = router.getRoutes()
@@ -168,66 +168,66 @@ describe('Router Configuration', () => {
   })
 
   describe('Authentication Guard', () => {
-    it('redirects to login when no API key is present', async () => {
+    it('redirects to login when no token is present', async () => {
       router = createTestRouter()
       router.beforeEach((to: any, from: any, next: any) => {
         const sessionStore = useSessionStore()
-        if (!sessionStore.apiKey) sessionStore.loadFromStorage()
-        if (to.path !== '/login' && !sessionStore.apiKey) next('/login')
+        if (!sessionStore.token) sessionStore.loadFromStorage()
+        if (to.path !== '/login' && !sessionStore.token) next('/login')
         else next()
       })
       const sessionStore = useSessionStore()
-      sessionStore.clearKey()
+      sessionStore.clearSession()
       await router.push('/dashboard')
       expect(router.currentRoute.value.path).toBe('/login')
     })
 
-    it('allows access to login page without API key', async () => {
+    it('allows access to login page without token', async () => {
       router = createTestRouter()
       router.beforeEach((to: any, from: any, next: any) => {
         const sessionStore = useSessionStore()
-        if (!sessionStore.apiKey) sessionStore.loadFromStorage()
-        if (to.path !== '/login' && !sessionStore.apiKey) next('/login')
+        if (!sessionStore.token) sessionStore.loadFromStorage()
+        if (to.path !== '/login' && !sessionStore.token) next('/login')
         else next()
       })
       const sessionStore = useSessionStore()
-      sessionStore.clearKey()
+      sessionStore.clearSession()
       await router.push('/login')
       expect(router.currentRoute.value.path).toBe('/login')
     })
 
-    it('allows access to protected routes when API key is present', async () => {
+    it('allows access to protected routes when token is present', async () => {
       router = createTestRouter()
       router.beforeEach((to: any, from: any, next: any) => {
         const sessionStore = useSessionStore()
-        if (!sessionStore.apiKey) sessionStore.loadFromStorage()
-        if (to.path !== '/login' && !sessionStore.apiKey) next('/login')
+        if (!sessionStore.token) sessionStore.loadFromStorage()
+        if (to.path !== '/login' && !sessionStore.token) next('/login')
         else next()
       })
       const sessionStore = useSessionStore()
-      sessionStore.setKey('test-api-key')
+      sessionStore.setSession('test-api-key', 'test@example.com', 1)
       await router.push('/transactions')
       expect(router.currentRoute.value.path).toBe('/transactions')
     })
 
-    it.skip('loads API key from storage on navigation', async () => {
+    it.skip('loads token from storage on navigation', async () => {
       // Set up Pinia and the spy before creating the router
       setActivePinia(createPinia())
       vi.restoreAllMocks()
-      const mockApiKey = 'stored-api-key'
-      const getItemSpy = vi.spyOn(sessionStorage, 'getItem').mockReturnValue(mockApiKey)
+      const mockToken = 'stored-token'
+      const getItemSpy = vi.spyOn(sessionStorage, 'getItem').mockReturnValue(mockToken)
       router = createTestRouter()
       router.beforeEach((to: any, from: any, next: any) => {
         const sessionStore = useSessionStore()
-        if (!sessionStore.apiKey) sessionStore.loadFromStorage()
-        if (to.path !== '/login' && !sessionStore.apiKey) next('/login')
+        if (!sessionStore.token) sessionStore.loadFromStorage()
+        if (to.path !== '/login' && !sessionStore.token) next('/login')
         else next()
       })
       const sessionStore = useSessionStore()
-      sessionStore.clearKey()
-      expect(sessionStore.apiKey).toBe('')
+      sessionStore.clearSession()
+      expect(sessionStore.token).toBe('')
       await router.push('/transactions')
-      expect(getItemSpy).toHaveBeenCalledWith('apiKey')
+      expect(getItemSpy).toHaveBeenCalledWith('authToken')
     })
   })
 
@@ -236,12 +236,12 @@ describe('Router Configuration', () => {
       router = createTestRouter()
       router.beforeEach((to: any, from: any, next: any) => {
         const sessionStore = useSessionStore()
-        if (!sessionStore.apiKey) sessionStore.loadFromStorage()
-        if (to.path !== '/login' && !sessionStore.apiKey) next('/login')
+        if (!sessionStore.token) sessionStore.loadFromStorage()
+        if (to.path !== '/login' && !sessionStore.token) next('/login')
         else next()
       })
       const sessionStore = useSessionStore()
-      sessionStore.setKey('test-api-key')
+      sessionStore.setSession('test-api-key', 'test@example.com', 1)
 
       await router.push('/unknown-route')
       expect(router.currentRoute.value.name).toBe('not-found')
@@ -251,12 +251,12 @@ describe('Router Configuration', () => {
       router = createTestRouter()
       router.beforeEach((to: any, from: any, next: any) => {
         const sessionStore = useSessionStore()
-        if (!sessionStore.apiKey) sessionStore.loadFromStorage()
-        if (to.path !== '/login' && !sessionStore.apiKey) next('/login')
+        if (!sessionStore.token) sessionStore.loadFromStorage()
+        if (to.path !== '/login' && !sessionStore.token) next('/login')
         else next()
       })
       const sessionStore = useSessionStore()
-      sessionStore.setKey('test-api-key')
+      sessionStore.setSession('test-api-key', 'test@example.com', 1)
 
       await router.push('/dashboard/nested/unknown')
       expect(router.currentRoute.value.name).toBe('not-found')
@@ -266,12 +266,12 @@ describe('Router Configuration', () => {
       router = createTestRouter()
       router.beforeEach((to: any, from: any, next: any) => {
         const sessionStore = useSessionStore()
-        if (!sessionStore.apiKey) sessionStore.loadFromStorage()
-        if (to.path !== '/login' && !sessionStore.apiKey) next('/login')
+        if (!sessionStore.token) sessionStore.loadFromStorage()
+        if (to.path !== '/login' && !sessionStore.token) next('/login')
         else next()
       })
       const sessionStore = useSessionStore()
-      sessionStore.clearKey()
+      sessionStore.clearSession()
 
       await router.push('/unknown-route')
       expect(router.currentRoute.value.path).toBe('/login')
@@ -283,12 +283,12 @@ describe('Router Configuration', () => {
       router = createTestRouter()
       router.beforeEach((to: any, from: any, next: any) => {
         const sessionStore = useSessionStore()
-        if (!sessionStore.apiKey) sessionStore.loadFromStorage()
-        if (to.path !== '/login' && !sessionStore.apiKey) next('/login')
+        if (!sessionStore.token) sessionStore.loadFromStorage()
+        if (to.path !== '/login' && !sessionStore.token) next('/login')
         else next()
       })
       const sessionStore = useSessionStore()
-      sessionStore.setKey('test-api-key')
+      sessionStore.setSession('test-api-key', 'test@example.com', 1)
 
       await router.push('/transactions')
       expect(router.currentRoute.value.path).toBe('/transactions')
@@ -299,12 +299,12 @@ describe('Router Configuration', () => {
       router = createTestRouter()
       router.beforeEach((to: any, from: any, next: any) => {
         const sessionStore = useSessionStore()
-        if (!sessionStore.apiKey) sessionStore.loadFromStorage()
-        if (to.path !== '/login' && !sessionStore.apiKey) next('/login')
+        if (!sessionStore.token) sessionStore.loadFromStorage()
+        if (to.path !== '/login' && !sessionStore.token) next('/login')
         else next()
       })
       const sessionStore = useSessionStore()
-      sessionStore.setKey('test-api-key')
+      sessionStore.setSession('test-api-key', 'test@example.com', 1)
 
       await router.push('/dashboard')
       expect(router.currentRoute.value.path).toBe('/dashboard')

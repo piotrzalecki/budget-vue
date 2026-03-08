@@ -17,15 +17,15 @@ export function useApi(): AxiosInstance {
     timeout: 10_000,
   })
 
-  // request: inject key
+  // request: inject token
   api.interceptors.request.use(cfg => {
     console.log(
       'Making API request to:',
       cfg.url,
-      'with API key:',
-      session.apiKey ? 'SET' : 'NOT SET'
+      'with token:',
+      session.token ? 'SET' : 'NOT SET'
     )
-    cfg.headers['X-API-Key'] = session.apiKey
+    cfg.headers['Authorization'] = `Bearer ${session.token}`
     return cfg
   })
 
@@ -34,7 +34,7 @@ export function useApi(): AxiosInstance {
     res => res,
     err => {
       if (err.response?.status === 401) {
-        session.clearKey()
+        session.clearSession()
         snackbar.push('Session expired', 'error')
         router.push('/login')
       } else {

@@ -2,8 +2,8 @@
   <v-dialog v-model="dialog" max-width="400">
     <v-card>
       <v-card-title class="text-h6">
-        <v-icon class="mr-2">mdi-plus</v-icon>
-        Add New Tag
+        <v-icon class="mr-2">{{ isEdit ? 'mdi-pencil' : 'mdi-plus' }}</v-icon>
+        {{ isEdit ? 'Edit Tag' : 'Add New Tag' }}
       </v-card-title>
       <v-card-text>
         <v-form ref="form" v-model="valid">
@@ -27,7 +27,7 @@
           :loading="saving"
           :disabled="!valid || !tagName.trim()"
         >
-          Add
+          {{ isEdit ? 'Save' : 'Add' }}
         </v-btn>
       </v-card-actions>
     </v-card>
@@ -35,10 +35,12 @@
 </template>
 
 <script setup lang="ts">
-  import { computed, ref } from 'vue'
+  import { computed, ref, watch } from 'vue'
+  import type { Tag } from '../stores/tags'
 
   const props = defineProps<{
     modelValue: boolean
+    tag?: Tag | null
   }>()
 
   const emit = defineEmits<{
@@ -51,10 +53,19 @@
     set: value => emit('update:modelValue', value),
   })
 
+  const isEdit = computed(() => !!props.tag)
+
   const valid = ref(false)
   const tagName = ref('')
   const saving = ref(false)
   const form = ref()
+
+  watch(
+    () => props.modelValue,
+    open => {
+      if (open) tagName.value = props.tag?.name ?? ''
+    }
+  )
 
   const rules = {
     required: (value: string) => !!value.trim() || 'Tag name is required',

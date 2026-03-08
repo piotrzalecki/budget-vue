@@ -47,27 +47,27 @@ describe('useApi', () => {
     expect(() => useApi()).not.toThrow()
   })
 
-  it('adds X-API-Key header to requests', () => {
+  it('adds Authorization: Bearer header to requests', () => {
     const sessionStore = useSessionStore()
-    sessionStore.setKey('abc123')
+    sessionStore.setSession('abc123', 'test@example.com', 1)
 
     useApi()
 
     // Since we can't directly test the interceptors due to mocking,
     // we verify the composable works with the session store
-    expect(sessionStore.apiKey).toBe('abc123')
+    expect(sessionStore.token).toBe('abc123')
   })
 
   it('handles 401 errors by clearing session and redirecting to login', () => {
     const sessionStore = useSessionStore()
     const snackbar = useSnackbar()
 
-    sessionStore.setKey('abc123')
+    sessionStore.setSession('abc123', 'test@example.com', 1)
     useApi()
 
     // Since we can't directly test the interceptors due to mocking,
     // we verify the session store and snackbar are available
-    expect(sessionStore.apiKey).toBe('abc123')
+    expect(sessionStore.token).toBe('abc123')
     expect(snackbar.push).toBeDefined()
   })
 

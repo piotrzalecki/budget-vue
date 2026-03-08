@@ -2,29 +2,44 @@ import { defineStore } from 'pinia'
 import { ref } from 'vue'
 
 export const useSessionStore = defineStore('session', () => {
-  const apiKey = ref<string>('')
+  const token = ref<string>('')
+  const email = ref<string>('')
+  const userId = ref<number | null>(null)
 
-  const setKey = (key: string) => {
-    apiKey.value = key
-    sessionStorage.setItem('apiKey', key)
+  const setSession = (t: string, e: string, id: number) => {
+    token.value = t
+    email.value = e
+    userId.value = id
+    sessionStorage.setItem('authToken', t)
+    sessionStorage.setItem('authEmail', e)
+    sessionStorage.setItem('authUserId', String(id))
   }
 
   const loadFromStorage = () => {
-    const storedKey = sessionStorage.getItem('apiKey')
-    if (storedKey) {
-      apiKey.value = storedKey
-    }
+    const storedToken = sessionStorage.getItem('authToken')
+    const storedEmail = sessionStorage.getItem('authEmail')
+    const storedUserId = sessionStorage.getItem('authUserId')
+    if (!storedToken || !storedEmail || !storedUserId) return
+    token.value = storedToken
+    email.value = storedEmail
+    userId.value = parseInt(storedUserId, 10)
   }
 
-  const clearKey = () => {
-    apiKey.value = ''
-    sessionStorage.removeItem('apiKey')
+  const clearSession = () => {
+    token.value = ''
+    email.value = ''
+    userId.value = null
+    sessionStorage.removeItem('authToken')
+    sessionStorage.removeItem('authEmail')
+    sessionStorage.removeItem('authUserId')
   }
 
   return {
-    apiKey,
-    setKey,
+    token,
+    email,
+    userId,
+    setSession,
     loadFromStorage,
-    clearKey,
+    clearSession,
   }
 })
