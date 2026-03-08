@@ -117,6 +117,9 @@ npm run test:ui
 npm run test:run
 ```
 
+Vite serves the app strictly on port `5173`. If that port is busy, it will fail to start.
+The port is fixed so the backend can allowlist `localhost:5173` in its CORS configuration.
+
 ### Production
 
 ```bash
