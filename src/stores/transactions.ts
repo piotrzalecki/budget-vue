@@ -49,7 +49,7 @@ export const useTransactionsStore = defineStore('transactions', () => {
       // If amount is a string (like "15.50"), convert to pence
       let amount_pence = transaction.amount_pence || 0
       if (typeof transaction.amount === 'string' && !amount_pence) {
-        amount_pence = Math.round(parseFloat(transaction.amount) * 100) || 0
+        amount_pence = parseInt(transaction.amount, 10) || 0
       }
 
       // Handle tags - API might return tag_ids or tags
@@ -171,7 +171,7 @@ export const useTransactionsStore = defineStore('transactions', () => {
     try {
       // Convert to API format
       const apiPayload = {
-        amount: (transaction.amount_pence / 100).toFixed(2),
+        amount: String(transaction.amount_pence),
         t_date: transaction.t_date,
         tag_ids: transaction.tag_ids,
         note: transaction.note,
@@ -209,7 +209,7 @@ export const useTransactionsStore = defineStore('transactions', () => {
     try {
       // Convert to API format
       const apiPayload = {
-        amount: (transaction.amount_pence / 100).toFixed(2),
+        amount: String(transaction.amount_pence),
         t_date: transaction.t_date,
         tag_ids: transaction.tag_ids,
         note: transaction.note,

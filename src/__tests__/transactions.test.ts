@@ -100,7 +100,7 @@ describe('useTransactionsStore', () => {
     it('should convert string amount to pence when amount_pence is not provided', () => {
       const transaction = {
         id: 1,
-        amount: '15.50',
+        amount: '1550',
         note: 'Test transaction',
         t_date: '2024-01-01',
         created_at: '2024-01-01T00:00:00Z',

@@ -12,6 +12,7 @@ export const navigationItems = [
   },
   { title: 'Recurring', path: '/recurring', name: 'recurring', icon: 'mdi-refresh' },
   { title: 'Tags', path: '/tags', name: 'tags', icon: 'mdi-tag' },
+  { title: 'Users', path: '/users', name: 'users', icon: 'mdi-account-multiple' },
   { title: 'Settings', path: '/settings', name: 'settings', icon: 'mdi-cog' },
 ]
 
@@ -50,6 +51,11 @@ const router = createRouter({
       component: () => import('../pages/SettingsPage.vue'),
     },
     {
+      path: '/users',
+      name: 'users',
+      component: () => import('../pages/UsersPage.vue'),
+    },
+    {
       path: '/:pathMatch(.*)*',
       name: 'not-found',
       component: () => import('../pages/NotFound.vue'),
@@ -61,13 +67,13 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
   const sessionStore = useSessionStore()
 
-  // Load API key from storage on app start
-  if (!sessionStore.apiKey) {
+  // Load token from storage on app start
+  if (!sessionStore.token) {
     sessionStore.loadFromStorage()
   }
 
-  // Redirect to login if no API key (except for login page)
-  if (to.path !== '/login' && !sessionStore.apiKey) {
+  // Redirect to login if no token (except for login page)
+  if (to.path !== '/login' && !sessionStore.token) {
     next('/login')
   } else {
     next()

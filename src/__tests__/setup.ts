@@ -41,3 +41,16 @@ global.ResizeObserver = vi.fn().mockImplementation(() => ({
   unobserve: vi.fn(),
   disconnect: vi.fn(),
 }))
+
+// Mock localStorage (required by @vue/devtools-kit in test environments)
+class LocalStorageMock {
+  private store: Record<string, string> = {}
+  getItem(key: string) { return this.store[key] ?? null }
+  setItem(key: string, value: string) { this.store[key] = value }
+  removeItem(key: string) { delete this.store[key] }
+  clear() { this.store = {} }
+}
+Object.defineProperty(global, 'localStorage', {
+  value: new LocalStorageMock(),
+  writable: true,
+})
